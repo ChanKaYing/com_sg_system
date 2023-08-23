@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "719940192875",
+    "project_id": "systemlogin-b9287",
+    "storage_bucket": "systemlogin-b9287.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:719940192875:android:d4cd3db685a3aef4eebf2e",
+        "android_client_info": {
+          "package_name": "com.example.com_sg_system"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "719940192875-vinils9drvru3bl3i2l34arbeqmhcr5e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOFqSVdzOUbgXPJBkU5tkoQs1xtvyPX4U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "719940192875-vinils9drvru3bl3i2l34arbeqmhcr5e.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "719940192875-rnpg5jjlia2lmshk01e3cgefbqdfo990.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.comSgSystem"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
