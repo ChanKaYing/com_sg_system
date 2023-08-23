@@ -1,6 +1,8 @@
 import 'package:com_sg_system/admin_main.dart';
 import 'package:com_sg_system/facility.dart';
+import 'package:com_sg_system/family_detail.dart';
 import 'package:com_sg_system/login_page.dart';
+import 'package:com_sg_system/user_data.dart';
 import 'package:com_sg_system/user_notification.dart';
 import 'package:flutter/material.dart';
 
@@ -35,7 +37,7 @@ class UserMainPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => LoginPage()),
+                MaterialPageRoute(builder: (context) => LoginApp()),
               );
             },
           ),
@@ -75,7 +77,7 @@ class UserMainPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AdminMainPage()),
+                  MaterialPageRoute(builder: (context) => UserMainPage()),
                 );
               },
             ),
@@ -127,7 +129,10 @@ class UserMainPage extends StatelessWidget {
             ListTile(
               title: Text('Family Detail'),
               onTap: () {
-                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => FamilyPage()),
+                );
               },
             ),
             Container(
@@ -141,15 +146,18 @@ class UserMainPage extends StatelessWidget {
               ),
               child: ListTile(
                 title: Text(
-                  'Button at Bottom',
+                  'Profile',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue, // Customize the color as needed
+                    color: Colors.black, // Customize the color as needed
                   ),
                   textAlign: TextAlign.center,
                 ),
                 onTap: () {
-                  // Code to be executed when the "button" is tapped
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ProfilePage()),
+                  );
                 },
               ),
             ),

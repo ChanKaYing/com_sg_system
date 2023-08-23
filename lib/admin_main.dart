@@ -1,5 +1,9 @@
+import 'package:com_sg_system/admin_notification.dart';
 import 'package:com_sg_system/facility.dart';
+import 'package:com_sg_system/family_detail.dart';
 import 'package:com_sg_system/login_page.dart';
+import 'package:com_sg_system/register_page.dart';
+import 'package:com_sg_system/user_data.dart';
 import 'package:com_sg_system/user_notification.dart';
 import 'package:flutter/material.dart';
 
@@ -34,7 +38,7 @@ class AdminMainPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => LoginPage()),
+                MaterialPageRoute(builder: (context) => LoginApp()),
               );
             },
           ),
@@ -83,7 +87,7 @@ class AdminMainPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => UserNotificationPage()),
+                  MaterialPageRoute(builder: (context) => AdminNotificationPage()),
                 );
               },
             ),
@@ -126,9 +130,31 @@ class AdminMainPage extends StatelessWidget {
             ListTile(
               title: Text('Family Detail'),
               onTap: () {
-                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => FamilyPage()),
+                );
+                },
+            ),
+            ListTile(
+              title: Text('Visitor Data'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProfilePage()),
+                );
               },
             ),
+            ListTile(
+              title: Text('Register'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegisterPage()),
+                );
+              },
+            ),
+
             Container(
               decoration: BoxDecoration(
                 border: Border(
@@ -140,7 +166,7 @@ class AdminMainPage extends StatelessWidget {
               ),
               child: ListTile(
                 title: Text(
-                  'Button at Bottom',
+                  'Profile',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.blue, // Customize the color as needed
@@ -148,7 +174,10 @@ class AdminMainPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 onTap: () {
-                  // Code to be executed when the "button" is tapped
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ProfilePage()),
+                  );
                 },
               ),
             ),

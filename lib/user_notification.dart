@@ -9,7 +9,7 @@ class UserNotificationApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: UserNotificationPage(),
-    ); 
+    );
   }
 }
 

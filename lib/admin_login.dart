@@ -1,31 +1,31 @@
-import 'package:com_sg_system/admin_login.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'user_main.dart';
+import 'admin_main.dart';
+import 'login_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(LoginApp());
+  runApp(AdminLoginApp());
 }
 
-class LoginApp extends StatelessWidget {
+class AdminLoginApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: LoginPage(),
+      home: AdminLoginPage(),
     );
   }
 }
 
-class LoginPage extends StatefulWidget {
+class AdminLoginPage extends StatefulWidget {
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _AdminLoginPageState createState() => _AdminLoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _AdminLoginPageState extends State<AdminLoginPage> {
   TextEditingController _nameController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
@@ -34,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login Page'),
+        title: Text('Admin Login Page'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Our Community App!',
+                      'For Admin Login!',
                       style: TextStyle(
                         fontSize: 24.0,
                         fontWeight: FontWeight.bold,
@@ -131,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                 } else {
                   try {
                     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                        .collection('users')
+                        .collection('admins')
                         .where('name', isEqualTo: username)
                         .limit(1)
                         .get();
@@ -145,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                         // Password matches, proceed with login
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => UserMainPage()),
+                          MaterialPageRoute(builder: (context) => AdminMainPage()),
                         );
                       } else {
                         showDialog(
@@ -172,7 +172,7 @@ class _LoginPageState extends State<LoginPage> {
                         builder: (BuildContext context) {
                           return AlertDialog(
                             title: Text('Error'),
-                            content: Text('User not found.'),
+                            content: Text('Admin not found.'),
                             actions: [
                               TextButton(
                                 onPressed: () {
@@ -218,10 +218,10 @@ class _LoginPageState extends State<LoginPage> {
                     // Navigate to another page here
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => AdminLoginPage()),
+                      MaterialPageRoute(builder: (context) => LoginPage()),
                     );
                   },
-                  child: Text('For Admin Login'),
+                  child: Text('For User Login'),
                 ),
                 // Other widgets
               ],
