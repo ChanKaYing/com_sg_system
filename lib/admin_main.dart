@@ -1,7 +1,9 @@
-import 'package:com_sg_system/Appointment.dart';
-import 'package:com_sg_system/admin_notification.dart';
-import 'package:com_sg_system/register_page.dart';
+import 'package:com_sg_system/facility.dart';
+import 'package:com_sg_system/login_page.dart';
+import 'package:com_sg_system/user_notification.dart';
 import 'package:flutter/material.dart';
+
+import 'appointment.dart';
 
 void main() {
   runApp(MyApp());
@@ -11,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Main Page',
+      title: 'Admin Main Page',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -25,18 +27,55 @@ class AdminMainPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Main Page'),
+        title: Text('Admin Main Page'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
+            },
+          ),
+        ],
       ),
-      drawer: Drawer( // Add a Drawer
+
+      drawer: Drawer(
         child: ListView(
           children: [
             DrawerHeader(
-              child: Text('Navigation'), // Customize your drawer header
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('images/harphome.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    color: Colors.grey.withOpacity(0.5), // Colored background bar
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 85),// Adjust padding as needed
+                    child: Text(
+                      'Navigation',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             ListTile(
               title: Text('Main Page'),
               onTap: () {
-                // Navigate to screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AdminMainPage()),
+                );
               },
             ),
             ListTile(
@@ -44,9 +83,8 @@ class AdminMainPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => NotificationPage()),
+                  MaterialPageRoute(builder: (context) => UserNotificationPage()),
                 );
-                // Navigate to screen
               },
             ),
             ListTile(
@@ -54,62 +92,72 @@ class AdminMainPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AppointmentPage()),
+                  MaterialPageRoute(builder: (context) => UserAppointmentPage()),
                 );
-                // Navigate to screen
               },
             ),
             ListTile(
               title: Text('Facility'),
               onTap: () {
-                // Navigate to screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => FacilityPage()),
+                );
               },
             ),
             ListTile(
               title: Text('Public Space'),
               onTap: () {
-                // Navigate to screen
+                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
               },
             ),
             ListTile(
               title: Text('Payment Detail'),
               onTap: () {
-                // Navigate to screen
+                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
               },
             ),
             ListTile(
               title: Text('Card'),
               onTap: () {
-                // Navigate to screen
+                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
               },
             ),
             ListTile(
               title: Text('Family Detail'),
               onTap: () {
-                // Navigate to screen
+                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
               },
             ),
-
-            ListTile(
-              title: Text('Register'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RegisterPage()),
-                );
-                // Navigate to screen
-              },
-            ),
-            ListTile(
-              title: Text('Visitor Data'),
-              onTap: () {
-                // Navigate to screen
-              },
+            Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.grey,
+                    width: 1.0,
+                  ),
+                ),
+              ),
+              child: ListTile(
+                title: Text(
+                  'Button at Bottom',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue, // Customize the color as needed
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                onTap: () {
+                  // Code to be executed when the "button" is tapped
+                },
+              ),
             ),
 
           ],
         ),
       ),
+
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -129,7 +177,7 @@ class AdminMainPage extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'Notification: Your community maintenance fee is due, please pay it before September 1st',
+                    'Payment Detail: Your community maintenance fee is due, please pay it before September 1st',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 14),
                   ),
@@ -159,14 +207,6 @@ class AdminMainPage extends StatelessWidget {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             ImageButtonsRow2(),
-            SizedBox(height: 8),
-
-            Text(
-              'For Admin Only',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            ImageButtonsRow3(),
             SizedBox(height: 8),
           ],
         ),
@@ -224,8 +264,10 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 90,
           height: 90,
           onPressed: () {
-            // Handle pre-register button click
-            // You can add your logic here
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => UserAppointmentPage()),
+            );
           },
         ),
         ImageButtonWithText(
@@ -234,8 +276,10 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 80,
           height: 90,
           onPressed: () {
-            // Handle facility button click
-            // You can add your logic here
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => FacilityPage()),
+            );
           },
         ),
         ImageButtonWithText(
@@ -244,8 +288,7 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 95,
           height: 95,
           onPressed: () {
-            // Handle public space button click
-            // You can add your logic here
+            ///////////////////////////////////////////////////////////////////////////////no item
           },
         ),
       ],
@@ -265,8 +308,7 @@ class ImageButtonsRow2 extends StatelessWidget {
           width: 80,
           height: 80,
           onPressed: () {
-            // Handle payment button click
-            // You can add your logic here
+            ////////////////////////////////////////////////////////////////////////////////no item
           },
         ),
         ImageButtonWithText(
@@ -275,49 +317,16 @@ class ImageButtonsRow2 extends StatelessWidget {
           width: 80,
           height: 80,
           onPressed: () {
-            // Handle card button click
-            // You can add your logic here
+            ///////////////////////////////////////////////////////////////////////////////no item
           },
         ),
         ImageButtonWithText(
           image: AssetImage("images/family.png"),
-          text: "Family",
+          text: "Family Detail",
           width: 80,
           height: 80,
           onPressed: () {
-            // Handle family button click
-            // You can add your logic here
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class ImageButtonsRow3 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        ImageButtonWithText(
-          image: AssetImage("images/register.png"),
-          text: "Register",
-          width: 80,
-          height: 80,
-          onPressed: () {
-            // Handle payment button click
-            // You can add your logic here
-          },
-        ),
-        ImageButtonWithText(
-          image: AssetImage("images/visitor.png"),
-          text: "Card",
-          width: 80,
-          height: 80,
-          onPressed: () {
-            // Handle card button click
-            // You can add your logic here
+            //////////////////////////////////////////////////////////////////////////////no item
           },
         ),
       ],

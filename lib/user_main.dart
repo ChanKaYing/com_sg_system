@@ -1,5 +1,10 @@
 import 'package:com_sg_system/admin_main.dart';
+import 'package:com_sg_system/facility.dart';
+import 'package:com_sg_system/login_page.dart';
+import 'package:com_sg_system/user_notification.dart';
 import 'package:flutter/material.dart';
+
+import 'appointment.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,23 +18,57 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MainPage(),
+      home: UserMainPage(),
     );
   }
 }
 
-class MainPage extends StatelessWidget {
+class UserMainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Main Page'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
+            },
+          ),
+        ],
       ),
-      drawer: Drawer( // Add a Drawer
+
+      drawer: Drawer(
         child: ListView(
           children: [
             DrawerHeader(
-              child: Text('Navigation'), // Customize your drawer header
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('images/harphome.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    color: Colors.grey.withOpacity(0.5), // Colored background bar
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 85),// Adjust padding as needed
+                    child: Text(
+                      'Navigation',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             ListTile(
               title: Text('Main Page'),
@@ -38,55 +77,88 @@ class MainPage extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (context) => AdminMainPage()),
                 );
-                // Navigate to screen
               },
             ),
             ListTile(
               title: Text('Notification'),
               onTap: () {
-                // Navigate to screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UserNotificationPage()),
+                );
               },
             ),
             ListTile(
               title: Text('Pre-Register'),
               onTap: () {
-                // Navigate to screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UserAppointmentPage()),
+                );
               },
             ),
             ListTile(
               title: Text('Facility'),
               onTap: () {
-                // Navigate to screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => FacilityPage()),
+                );
               },
             ),
             ListTile(
               title: Text('Public Space'),
               onTap: () {
-                // Navigate to screen
+                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
               },
             ),
             ListTile(
               title: Text('Payment Detail'),
               onTap: () {
-                // Navigate to screen
+                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
               },
             ),
             ListTile(
               title: Text('Card'),
               onTap: () {
-                // Navigate to screen
+                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
               },
             ),
             ListTile(
               title: Text('Family Detail'),
               onTap: () {
-                // Navigate to screen
+                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
               },
+            ),
+            Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.grey,
+                    width: 1.0,
+                  ),
+                ),
+              ),
+              child: ListTile(
+                title: Text(
+                  'Button at Bottom',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue, // Customize the color as needed
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                onTap: () {
+                  // Code to be executed when the "button" is tapped
+                },
+              ),
             ),
 
           ],
         ),
       ),
+
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -193,8 +265,10 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 90,
           height: 90,
           onPressed: () {
-            // Handle pre-register button click
-            // You can add your logic here
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => UserAppointmentPage()),
+            );
           },
         ),
         ImageButtonWithText(
@@ -203,8 +277,10 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 80,
           height: 90,
           onPressed: () {
-            // Handle facility button click
-            // You can add your logic here
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => FacilityPage()),
+            );
           },
         ),
         ImageButtonWithText(
@@ -213,8 +289,7 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 95,
           height: 95,
           onPressed: () {
-            // Handle public space button click
-            // You can add your logic here
+            ///////////////////////////////////////////////////////////////////////////////no item
           },
         ),
       ],
@@ -234,8 +309,7 @@ class ImageButtonsRow2 extends StatelessWidget {
           width: 80,
           height: 80,
           onPressed: () {
-            // Handle payment button click
-            // You can add your logic here
+            ////////////////////////////////////////////////////////////////////////////////no item
           },
         ),
         ImageButtonWithText(
@@ -244,18 +318,16 @@ class ImageButtonsRow2 extends StatelessWidget {
           width: 80,
           height: 80,
           onPressed: () {
-            // Handle card button click
-            // You can add your logic here
+            ///////////////////////////////////////////////////////////////////////////////no item
           },
         ),
         ImageButtonWithText(
           image: AssetImage("images/family.png"),
-          text: "Family",
+          text: "Family Detail",
           width: 80,
           height: 80,
           onPressed: () {
-            // Handle family button click
-            // You can add your logic here
+            //////////////////////////////////////////////////////////////////////////////no item
           },
         ),
       ],

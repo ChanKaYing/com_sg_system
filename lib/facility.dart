@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
-class AppointmentPage extends StatefulWidget {
+class FacilityPage extends StatefulWidget {
   @override
-  _AppointmentPageState createState() => _AppointmentPageState();
+  _FacilityPageState createState() => _FacilityPageState();
 }
 
-class _AppointmentPageState extends State<AppointmentPage> {
+class _FacilityPageState extends State<FacilityPage> {
   TextEditingController _nameController = TextEditingController();
   DateTime _checkInDate = DateTime.now();
   TimeOfDay _checkInTime = TimeOfDay.now();
@@ -55,7 +55,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pre-Register Appointment'),
+        title: Text('Booking Facility'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -163,4 +163,4 @@ class _AppointmentPageState extends State<AppointmentPage> {
   }
 }
 
-void main() => runApp(MaterialApp(home: AppointmentPage()));
+void main() => runApp(MaterialApp(home: FacilityPage()));

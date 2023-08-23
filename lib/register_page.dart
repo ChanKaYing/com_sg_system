@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(RegisterApp());
 }
 
@@ -25,6 +29,80 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController _addressController = TextEditingController();
 
   bool _isPasswordVisible = false;
+
+  void _registerUser() async {
+    String name = _nameController.text;
+    String email = _emailController.text;
+    String password = _passwordController.text;
+    String address = _addressController.text;
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty || address.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Please fill in all fields.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      try {
+        CollectionReference users = FirebaseFirestore.instance.collection('users');
+        await users.add({
+          'name': name,
+          'email': email,
+          'password': password,
+          'address': address,
+        });
+
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Success'),
+              content: Text('User registered successfully.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      } catch (e) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Error'),
+              content: Text('An error occurred while registering user.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+        print('Error: $e');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,39 +188,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             SizedBox(height: 32.0),
             ElevatedButton(
-              onPressed: () {
-                String name = _nameController.text;
-                String email = _emailController.text;
-                String password = _passwordController.text;
-                String address = _addressController.text;
-
-                if (name.isEmpty || email.isEmpty || password.isEmpty || address.isEmpty) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Error'),
-                        content: Text('Please fill in all fields.'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text('OK'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                } else {
-                  // Here you can perform your registration logic using the entered details
-                  // For now, let's just print them
-                  print('Name: $name');
-                  print('Email: $email');
-                  print('Password: $password');
-                  print('Address: $address');
-                }
-              },
+              onPressed: _registerUser,
               child: Text('Register'),
             ),
           ],
