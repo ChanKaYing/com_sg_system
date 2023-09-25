@@ -1,12 +1,17 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:com_sg_system/admin_notification.dart';
 import 'package:com_sg_system/facility.dart';
 import 'package:com_sg_system/family_detail.dart';
 import 'package:com_sg_system/login_page.dart';
+import 'package:com_sg_system/public_space.dart';
 import 'package:com_sg_system/register_page.dart';
 import 'package:com_sg_system/user_data.dart';
 import 'package:com_sg_system/user_notification.dart';
 import 'package:flutter/material.dart';
 
+import 'admin_payment.dart';
 import 'appointment.dart';
 
 void main() {
@@ -21,17 +26,20 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: AdminMainPage(),
     );
   }
 }
 
 class AdminMainPage extends StatelessWidget {
+  String adminName;
+
+  AdminMainPage({required this.adminName});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Admin Main Page'),
+        title: Text('Welcome, $adminName'), // Display the admin's name in the app bar
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
@@ -73,21 +81,15 @@ class AdminMainPage extends StatelessWidget {
                 ],
               ),
             ),
-            ListTile(
-              title: Text('Main Page'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AdminMainPage()),
-                );
-              },
-            ),
+
             ListTile(
               title: Text('Notification'),
               onTap: () {
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AdminNotificationPage()),
+                    context,
+                    MaterialPageRoute(
+                    builder: (context) => AdminNotificationPage(adminName: adminName), // Pass the admin's name here
+                  ),
                 );
               },
             ),
@@ -112,13 +114,19 @@ class AdminMainPage extends StatelessWidget {
             ListTile(
               title: Text('Public Space'),
               onTap: () {
-                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PublicSpacePage()),
+                );
               },
             ),
             ListTile(
               title: Text('Payment Detail'),
               onTap: () {
-                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AdminPayment()),
+                );
               },
             ),
             ListTile(
@@ -139,10 +147,7 @@ class AdminMainPage extends StatelessWidget {
             ListTile(
               title: Text('Visitor Data'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProfilePage()),
-                );
+                ////////////////////////////////////////////////////////////////////////////////////no item
               },
             ),
             ListTile(
@@ -192,6 +197,7 @@ class AdminMainPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             CardWidget(),
+
             SizedBox(height: 8),
 
             Text(
@@ -211,10 +217,17 @@ class AdminMainPage extends StatelessWidget {
                     style: TextStyle(fontSize: 14),
                   ),
                   SizedBox(height: 10), // Adding some spacing between the two Text widgets
-                  Text(
-                    'Click for more',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54),
+                  TextButton(
+                    onPressed: () {
+                      // Navigate to another page here
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AdminNotificationPage(adminName: adminName), // Pass the admin's name here
+                        ),
+                      );
+                    },
+                    child: Text('Click for more'),
                   ),
                 ],
               ),
@@ -237,6 +250,9 @@ class AdminMainPage extends StatelessWidget {
             ),
             ImageButtonsRow2(),
             SizedBox(height: 8),
+
+            ImageButtonsRow3(),
+            SizedBox(height: 8),
           ],
         ),
       ),
@@ -246,12 +262,52 @@ class AdminMainPage extends StatelessWidget {
 
 
 
-class CardWidget extends StatelessWidget {
+class CardWidget extends StatefulWidget {
+  @override
+  _CardWidgetState createState() => _CardWidgetState();
+}
+
+class _CardWidgetState extends State<CardWidget> {
+  int _currentIndex = 0;
+
+  List<String> _imagePaths = [
+    "images/pool1.png",
+    "images/house.png",
+    "images/apartment.jpg",
+    "images/malaysiaday.jpg",
+  ];
+
+  final double _fixedImageWidth = 250;
+
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(Duration(seconds: 3), _swapImage);
+  }
+
+  void _swapImage(Timer timer) {
+    setState(() {
+      _currentIndex = (_currentIndex + 1) % _imagePaths.length;
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: EdgeInsets.all(8),
-      child: Padding(
+      child:Container(
+      width: 300, // Set the fixed width for the card
+      height: 270, // Set the fixed height for the card
+
+      child:Padding(
         padding: EdgeInsets.all(16),
         child: Row(
           children: [
@@ -261,15 +317,16 @@ class CardWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Community or Apartment Name',
+                    'Community Security System',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 10),
                   Image.asset(
-                    "images/pool.png", // Replace with your image path
-                    width: 250, // Adjust the width as needed
-                    height: 250, // Adjust the height as needed
+                    _imagePaths[_currentIndex], // Use the current image path
+                    width: _fixedImageWidth, // Use the fixed image width
+                    height: _fixedImageWidth * (3 / 4), // Calculate height based on original aspect ratio
+
                   ),
                 ],
               ),
@@ -277,6 +334,7 @@ class CardWidget extends StatelessWidget {
           ],
         ),
       ),
+     )
     );
   }
 }
@@ -317,7 +375,10 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 95,
           height: 95,
           onPressed: () {
-            ///////////////////////////////////////////////////////////////////////////////no item
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PublicSpacePage()),
+            );
           },
         ),
       ],
@@ -337,7 +398,10 @@ class ImageButtonsRow2 extends StatelessWidget {
           width: 80,
           height: 80,
           onPressed: () {
-            ////////////////////////////////////////////////////////////////////////////////no item
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AdminPayment()),
+            );
           },
         ),
         ImageButtonWithText(
@@ -355,7 +419,42 @@ class ImageButtonsRow2 extends StatelessWidget {
           width: 80,
           height: 80,
           onPressed: () {
-            //////////////////////////////////////////////////////////////////////////////no item
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => FamilyPage()),
+            );
+             },
+        ),
+      ],
+    );
+  }
+}
+
+class ImageButtonsRow3 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ImageButtonWithText(
+          image: AssetImage("images/register.png"),
+          text: "Register",
+          width: 80,
+          height: 80,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => RegisterPage()),
+            );
+          },
+        ),
+        ImageButtonWithText(
+          image: AssetImage("images/visitor.png"),
+          text: "Visitor",
+          width: 80,
+          height: 80,
+          onPressed: () {
+            ///////////////////////////////////////////////////////////////////////////////no item
           },
         ),
       ],

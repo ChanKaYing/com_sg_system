@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
-class FacilityPage extends StatefulWidget {
+class PublicSpacePage extends StatefulWidget {
   @override
-  _FacilityPageState createState() => _FacilityPageState();
+  _PublicSpacePageState createState() => _PublicSpacePageState();
 }
 
-class _FacilityPageState extends State<FacilityPage> {
+class _PublicSpacePageState extends State<PublicSpacePage> {
   TextEditingController _nameController = TextEditingController();
   DateTime _checkInDate = DateTime.now();
   TimeOfDay _checkInTime = TimeOfDay.now();
   DateTime _checkOutDate = DateTime.now();
   TimeOfDay _checkOutTime = TimeOfDay.now();
   String _numPeople = '';
-  String _facilitytype = '';
+  String _publicSpaceType = '';
 
   Future<void> _selectDate(BuildContext context, bool isCheckIn) async {
     final DateTime? picked = await showDatePicker(
@@ -55,7 +55,7 @@ class _FacilityPageState extends State<FacilityPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Booking Facility'),
+        title: Text('Booking Public Space'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -134,11 +134,11 @@ class _FacilityPageState extends State<FacilityPage> {
               TextField(
                 onChanged: (value) {
                   setState(() {
-                    _facilitytype = value;
+                    _publicSpaceType = value;
                   });
                 },
                 decoration: InputDecoration(
-                  labelText: 'Facility Type',
+                  labelText: 'Public Space Type',
                 ),
               ),
               SizedBox(height: 32.0),
@@ -151,7 +151,7 @@ class _FacilityPageState extends State<FacilityPage> {
                   print('Check-out Date: $_checkOutDate');
                   print('Check-out Time: $_checkOutTime');
                   print('Number of People : $_numPeople');
-                  print('Facility Type: $_facilitytype');
+                  print('Public Space Type: $_publicSpaceType');
                 },
                 child: Text('Submit'),
               ),
@@ -163,4 +163,4 @@ class _FacilityPageState extends State<FacilityPage> {
   }
 }
 
-void main() => runApp(MaterialApp(home: FacilityPage()));
+void main() => runApp(MaterialApp(home: PublicSpacePage()));

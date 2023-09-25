@@ -33,9 +33,6 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Admin Login Page'),
-      ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
@@ -145,7 +142,9 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                         // Password matches, proceed with login
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => AdminMainPage()),
+                          MaterialPageRoute(
+                            builder: (context) => AdminMainPage(adminName: username), // Pass the admin's name here
+                          ),
                         );
                       } else {
                         showDialog(

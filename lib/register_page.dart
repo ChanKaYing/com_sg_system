@@ -116,8 +116,15 @@ class _RegisterPageState extends State<RegisterPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              height: 200.0,
+              height: 200.0, // Adjust the height as needed
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('images/apartment.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
               child: Card(
+                color: Colors.white.withOpacity(0.8),
                 elevation: 8.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -131,16 +138,18 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     SizedBox(height: 16.0),
                     Text(
-                      'Enter your details to register.',
+                      'Enter resident simple details to register.',
                       style: TextStyle(
                         fontSize: 16.0,
-                        color: Colors.grey,
+                        color: Colors.grey[60],
                       ),
                     ),
                   ],
                 ),
               ),
             ),
+
+
             SizedBox(height: 16.0),
             TextField(
               controller: _nameController,
