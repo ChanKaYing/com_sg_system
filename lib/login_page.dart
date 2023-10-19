@@ -1,9 +1,9 @@
-import 'package:com_sg_system/admin_login.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'user_main.dart';
+import 'admin_login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,20 +26,20 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController _nameController = TextEditingController();
+  TextEditingController _uidController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            body: Padding(
+      body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              height: 200.0, // Adjust the height as needed
+              height: 200.0,
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('images/apartment.jpg'),
@@ -74,9 +74,9 @@ class _LoginPageState extends State<LoginPage> {
 
             SizedBox(height: 32.0),
             TextField(
-              controller: _nameController,
+              controller: _uidController,
               decoration: InputDecoration(
-                labelText: 'Username',
+                labelText: 'UID',
                 prefixIcon: Icon(Icons.person),
               ),
             ),
@@ -104,16 +104,15 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(height: 32.0),
             ElevatedButton(
               onPressed: () async {
-                String username = _nameController.text;
-                String password = _passwordController.text;
+                int? uid = int.tryParse(_uidController.text);
 
-                if (username.isEmpty || password.isEmpty) {
+                if (uid == null) {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
                         title: Text('Error'),
-                        content: Text('Please fill in all fields.'),
+                        content: Text('Please enter a valid UID.'),
                         actions: [
                           TextButton(
                             onPressed: () {
@@ -127,22 +126,21 @@ class _LoginPageState extends State<LoginPage> {
                   );
                 } else {
                   try {
-                    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
                         .collection('users')
-                        .where('name', isEqualTo: username)
-                        .limit(1)
+                        .doc(uid.toString())
                         .get();
 
-                    if (querySnapshot.docs.isNotEmpty) {
-                      // User with the given username exists
-                      Map<String, dynamic> userData = querySnapshot.docs.first.data() as Map<String, dynamic>;
+                    if (userSnapshot.exists) {
+                      Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
                       String storedPassword = userData['password'];
 
-                      if (storedPassword == password) {
-                        // Password matches, proceed with login
+                      if (storedPassword == _passwordController.text) {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => UserMainPage()),
+                          MaterialPageRoute(
+                            builder: (context) => UserMainPage(useruid:uid),
+                          ),
                         );
                       } else {
                         showDialog(
@@ -183,6 +181,7 @@ class _LoginPageState extends State<LoginPage> {
                       );
                     }
                   } catch (e) {
+                    print(e);
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
@@ -204,15 +203,13 @@ class _LoginPageState extends State<LoginPage> {
                 }
               },
               child: Text('Login'),
-
             ),
+
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Other widgets
                 TextButton(
                   onPressed: () {
-                    // Navigate to another page here
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => AdminLoginPage()),
@@ -220,15 +217,11 @@ class _LoginPageState extends State<LoginPage> {
                   },
                   child: Text('For Admin Login'),
                 ),
-                // Other widgets
               ],
-            )
-
+            ),
           ],
         ),
       ),
     );
   }
 }
-
-

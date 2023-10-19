@@ -5,7 +5,7 @@ import 'package:com_sg_system/facility.dart';
 import 'package:com_sg_system/family_detail.dart';
 import 'package:com_sg_system/login_page.dart';
 import 'package:com_sg_system/admin_payment.dart';
-import 'package:com_sg_system/user_data.dart';
+import 'package:com_sg_system/user_profile.dart';
 import 'package:com_sg_system/user_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:com_sg_system/public_space.dart';
@@ -24,17 +24,20 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: UserMainPage(),
     );
   }
 }
 
 class UserMainPage extends StatelessWidget {
+  int useruid;
+
+  UserMainPage({required this.useruid});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Main Page'),
+        title: Text('Welcome, $useruid'),
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
@@ -76,15 +79,7 @@ class UserMainPage extends StatelessWidget {
                 ],
               ),
             ),
-            ListTile(
-              title: Text('Main Page'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => UserMainPage()),
-                );
-              },
-            ),
+
             ListTile(
               title: Text('Notification'),
               onTap: () {

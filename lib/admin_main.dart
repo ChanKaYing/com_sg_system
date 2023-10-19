@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:com_sg_system/admin_useraccount.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:com_sg_system/admin_notification.dart';
 import 'package:com_sg_system/facility.dart';
@@ -7,7 +8,7 @@ import 'package:com_sg_system/family_detail.dart';
 import 'package:com_sg_system/login_page.dart';
 import 'package:com_sg_system/public_space.dart';
 import 'package:com_sg_system/register_page.dart';
-import 'package:com_sg_system/user_data.dart';
+import 'package:com_sg_system/user_profile.dart';
 import 'package:com_sg_system/user_notification.dart';
 import 'package:flutter/material.dart';
 
@@ -86,8 +87,8 @@ class AdminMainPage extends StatelessWidget {
               title: Text('Notification'),
               onTap: () {
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
+                  context,
+                  MaterialPageRoute(
                     builder: (context) => AdminNotificationPage(adminName: adminName), // Pass the admin's name here
                   ),
                 );
@@ -132,7 +133,7 @@ class AdminMainPage extends StatelessWidget {
             ListTile(
               title: Text('Card'),
               onTap: () {
-                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
+                ////////////////////////////////////////////////////////////////////////////////////no item
               },
             ),
             ListTile(
@@ -142,7 +143,7 @@ class AdminMainPage extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (context) => FamilyPage()),
                 );
-                },
+              },
             ),
             ListTile(
               title: Text('Visitor Data'),
@@ -151,11 +152,11 @@ class AdminMainPage extends StatelessWidget {
               },
             ),
             ListTile(
-              title: Text('Register'),
+              title: Text('Users Account'),
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RegisterPage()),
+                  MaterialPageRoute(builder: (context) => UsersAccountPage()),
                 );
               },
             ),
@@ -302,39 +303,39 @@ class _CardWidgetState extends State<CardWidget> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.all(8),
-      child:Container(
-      width: 300, // Set the fixed width for the card
-      height: 270, // Set the fixed height for the card
+        margin: EdgeInsets.all(8),
+        child:Container(
+          width: 300, // Set the fixed width for the card
+          height: 270, // Set the fixed height for the card
 
-      child:Padding(
-        padding: EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Community Security System',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  Image.asset(
-                    _imagePaths[_currentIndex], // Use the current image path
-                    width: _fixedImageWidth, // Use the fixed image width
-                    height: _fixedImageWidth * (3 / 4), // Calculate height based on original aspect ratio
+          child:Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Community Security System',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 10),
+                      Image.asset(
+                        _imagePaths[_currentIndex], // Use the current image path
+                        width: _fixedImageWidth, // Use the fixed image width
+                        height: _fixedImageWidth * (3 / 4), // Calculate height based on original aspect ratio
 
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-     )
+          ),
+        )
     );
   }
 }
@@ -423,7 +424,7 @@ class ImageButtonsRow2 extends StatelessWidget {
               context,
               MaterialPageRoute(builder: (context) => FamilyPage()),
             );
-             },
+          },
         ),
       ],
     );
@@ -438,13 +439,13 @@ class ImageButtonsRow3 extends StatelessWidget {
       children: [
         ImageButtonWithText(
           image: AssetImage("images/register.png"),
-          text: "Register",
+          text: "Users Account",
           width: 80,
           height: 80,
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => RegisterPage()),
+              MaterialPageRoute(builder: (context) => UsersAccountPage()),
             );
           },
         ),
