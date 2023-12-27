@@ -69,31 +69,9 @@ class AdminNotificationPage extends StatefulWidget {
 
 class _AdminNotificationPageState extends State<AdminNotificationPage> {
   List<NotificationItem> notifications = [];
-  TextEditingController titleController = TextEditingController();
-  TextEditingController detailsController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _startListeningToNotifications();
-  }
-
-  void _startListeningToNotifications() {
-    FirebaseFirestore.instance
-        .collection('notifications')
-        .orderBy('timestamp') // Order by timestamp in ascending order
-        .snapshots()
-        .listen((snapshot) {
-      setState(() {
-        notifications = snapshot.docs.map((doc) => NotificationItem(
-          title: doc['title'],
-          details: doc['details'],
-          timestamp: doc['timestamp'],
-          senderName: doc['senderName'],
-        )).toList();
-      });
-    });
-  }
+  final titleController = TextEditingController();
+  final detailsController = TextEditingController();
 
   void _addNotification() async {
     String title = titleController.text;
@@ -113,25 +91,81 @@ class _AdminNotificationPageState extends State<AdminNotificationPage> {
 
     titleController.clear();
     detailsController.clear();
+  }
 
-    // Show alert dialog after adding notification
-    showDialog(
+  void _editNotification(NotificationItem notification) async {
+    TextEditingController titleController = TextEditingController(text: notification.title);
+    TextEditingController detailsController = TextEditingController(text: notification.details);
+
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Notification Added'),
-          content: Text('The notification has been successfully added.'),
+          title: Text('Edit Notification'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: InputDecoration(labelText: 'Notification Title'),
+              ),
+              SizedBox(height: 12),
+              TextField(
+                controller: detailsController,
+                decoration: InputDecoration(labelText: 'Notification Details'),
+              ),
+            ],
+          ),
           actions: <Widget>[
             TextButton(
-              child: Text('OK'),
+              child: Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Save'),
+              onPressed: () async {
+                String newTitle = titleController.text;
+                String newDetails = detailsController.text;
+
+                // Update Firestore document
+                await FirebaseFirestore.instance.collection('notifications').doc(notification.id).update({
+                  'title': newTitle,
+                  'details': newDetails,
+                });
+
+                Navigator.of(context).pop(); // Close the dialog
               },
             ),
           ],
         );
       },
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _startListeningToNotifications();
+  }
+
+  void _startListeningToNotifications() {
+    FirebaseFirestore.instance
+        .collection('notifications')
+        .orderBy('timestamp') // Order by timestamp in ascending order
+        .snapshots()
+        .listen((snapshot) {
+      setState(() {
+        notifications = snapshot.docs.map((doc) => NotificationItem(
+          id: doc.id,
+          title: doc['title'],
+          details: doc['details'],
+          timestamp: doc['timestamp'],
+          senderName: doc['senderName'],
+        )).toList();
+      });
+    });
   }
 
   @override
@@ -168,6 +202,10 @@ class _AdminNotificationPageState extends State<AdminNotificationPage> {
                       ),
                     ],
                   ),
+                  trailing: IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: () => _editNotification(notifications[index]),
+                  ),
                 );
               },
             ),
@@ -200,12 +238,14 @@ class _AdminNotificationPageState extends State<AdminNotificationPage> {
 }
 
 class NotificationItem {
+  final String id;
   final String title;
   final String details;
   final String timestamp;
   final String senderName;
 
   NotificationItem({
+    required this.id,
     required this.title,
     required this.details,
     required this.timestamp,

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class UserProfilePage extends StatefulWidget {
-  final String uid;
+class AdminProfilePage extends StatefulWidget {
+  final String adminName;
 
-  UserProfilePage({required this.uid});
+  AdminProfilePage({required this.adminName});
 
   @override
-  _UserProfilePageState createState() => _UserProfilePageState();
+  _AdminProfilePageState createState() => _AdminProfilePageState();
 }
 
-class _UserProfilePageState extends State<UserProfilePage> {
+class _AdminProfilePageState extends State<AdminProfilePage> {
   late TextEditingController _nameController;
   late TextEditingController _addressController;
   late TextEditingController _emailController;
@@ -24,12 +24,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
     _emailController = TextEditingController();
     _phoneController = TextEditingController();
 
-    fetchUserData();
+    fetchAdminData();
   }
 
-  Future<void> fetchUserData() async {
+  Future<void> fetchAdminData() async {
     DocumentSnapshot<Map<String, dynamic>> snapshot =
-    await FirebaseFirestore.instance.collection('users').doc(widget.uid).get();
+    await FirebaseFirestore.instance.collection('admins').doc(widget.adminName).get();
 
     if (snapshot.exists) {
       setState(() {
@@ -60,7 +60,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           actions: <Widget>[
             ElevatedButton(
               onPressed: () {
-                _updateUserDataInFirestore();
+                _updateAdminDataInFirestore();
                 _updateProfileData(); // Update the profile data on the page
                 Navigator.of(context).pop();
               },
@@ -81,9 +81,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  Future<void> _updateUserDataInFirestore() async {
+  Future<void> _updateAdminDataInFirestore() async {
     try {
-      await FirebaseFirestore.instance.collection('users').doc(widget.uid).update({
+      await FirebaseFirestore.instance.collection('admins').doc(widget.adminName).update({
         'name': _nameController.text,
         'address': _addressController.text,
         'email': _emailController.text,

@@ -1,19 +1,24 @@
 import 'dart:async';
 
-import 'package:com_sg_system/admin_useraccount.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:com_sg_system/admin_payment.dart';
+import 'package:com_sg_system/admin_useraccount.dart';
+
 import 'package:com_sg_system/admin_notification.dart';
 import 'package:com_sg_system/facility.dart';
-import 'package:com_sg_system/family_detail.dart';
+import 'package:com_sg_system/user_familydetail.dart';
 import 'package:com_sg_system/login_page.dart';
 import 'package:com_sg_system/public_space.dart';
 import 'package:com_sg_system/register_page.dart';
-import 'package:com_sg_system/user_profile.dart';
+import 'package:com_sg_system/admin_profile.dart';
 import 'package:com_sg_system/user_notification.dart';
+import 'package:com_sg_system/admin_profile.dart';
 import 'package:flutter/material.dart';
 
-import 'admin_payment.dart';
-import 'appointment.dart';
+import 'admin_familydetail.dart';
+import 'admin_profile.dart';
+import 'user_appointment.dart';
 
 void main() {
   runApp(MyApp());
@@ -32,8 +37,8 @@ class MyApp extends StatelessWidget {
 }
 
 class AdminMainPage extends StatelessWidget {
-  String adminName;
 
+  String adminName;
   AdminMainPage({required this.adminName});
 
   @override
@@ -97,10 +102,10 @@ class AdminMainPage extends StatelessWidget {
             ListTile(
               title: Text('Pre-Register'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => UserAppointmentPage()),
-                );
+                //             Navigator.push(
+                //              context,
+                //              MaterialPageRoute(builder: (context) => UserAppointmentPage()),
+                //            );
               },
             ),
             ListTile(
@@ -124,10 +129,10 @@ class AdminMainPage extends StatelessWidget {
             ListTile(
               title: Text('Payment Detail'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AdminPayment()),
-                );
+                //      Navigator.push(
+                //        context,
+                //        MaterialPageRoute(builder: (context) => AdminPayment()),
+                //      );
               },
             ),
             ListTile(
@@ -139,10 +144,12 @@ class AdminMainPage extends StatelessWidget {
             ListTile(
               title: Text('Family Detail'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => FamilyPage()),
-                );
+                //       Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //           builder: (context) => AdminFamilyPage(uid:adminName),
+                //        ),
+                //      );
               },
             ),
             ListTile(
@@ -175,14 +182,14 @@ class AdminMainPage extends StatelessWidget {
                   'Profile',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue, // Customize the color as needed
+                    color: Colors.black, // Customize the color as needed
                   ),
                   textAlign: TextAlign.center,
                 ),
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ProfilePage()),
+                    MaterialPageRoute(builder: (context) => AdminProfilePage(adminName: adminName,)),
                   );
                 },
               ),
@@ -249,7 +256,7 @@ class AdminMainPage extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            ImageButtonsRow2(),
+            ImageButtonsRow2(uid:adminName, adminName: '',),
             SizedBox(height: 8),
 
             ImageButtonsRow3(),
@@ -352,10 +359,10 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 90,
           height: 90,
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => UserAppointmentPage()),
-            );
+            //        Navigator.push(
+            //           context,
+            //         MaterialPageRoute(builder: (context) => UserAppointmentPage()),
+            //       );
           },
         ),
         ImageButtonWithText(
@@ -388,6 +395,10 @@ class ImageButtonsRow1 extends StatelessWidget {
 }
 
 class ImageButtonsRow2 extends StatelessWidget {
+
+  String adminName;
+  ImageButtonsRow2({required this.adminName, required String uid});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -401,7 +412,7 @@ class ImageButtonsRow2 extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => AdminPayment()),
+              MaterialPageRoute(builder: (context) => AdminPaymentPage()),
             );
           },
         ),
@@ -422,7 +433,9 @@ class ImageButtonsRow2 extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => FamilyPage()),
+              MaterialPageRoute(
+                builder: (context) => AdminFamilyPage(),
+              ),
             );
           },
         ),

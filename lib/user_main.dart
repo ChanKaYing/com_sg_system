@@ -1,16 +1,18 @@
 import 'dart:async';
 
 import 'package:com_sg_system/admin_main.dart';
-import 'package:com_sg_system/facility.dart';
-import 'package:com_sg_system/family_detail.dart';
-import 'package:com_sg_system/login_page.dart';
 import 'package:com_sg_system/admin_payment.dart';
+import 'package:com_sg_system/facility.dart';
+import 'package:com_sg_system/user_familydetail.dart';
+import 'package:com_sg_system/login_page.dart';
+import 'package:com_sg_system/user_payment.dart';
 import 'package:com_sg_system/user_profile.dart';
 import 'package:com_sg_system/user_notification.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:com_sg_system/public_space.dart';
 
-import 'appointment.dart';
+import 'user_appointment.dart';
 
 void main() {
   runApp(MyApp());
@@ -29,20 +31,21 @@ class MyApp extends StatelessWidget {
 }
 
 class UserMainPage extends StatelessWidget {
-  int useruid;
 
-  UserMainPage({required this.useruid});
+  int uid;
+  UserMainPage({required this.uid});
+  //uid: uid?.toString() ?? ''
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Welcome, $useruid'),
+        title: Text('Welcome, $uid'),
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
-              Navigator.push(
+              Navigator.pop(
                 context,
                 MaterialPageRoute(builder: (context) => LoginApp()),
               );
@@ -94,7 +97,7 @@ class UserMainPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => UserAppointmentPage()),
+                  MaterialPageRoute(builder: (context) => UserAppointmentPage(uid: uid?.toString() ?? '')),
                 );
               },
             ),
@@ -119,9 +122,12 @@ class UserMainPage extends StatelessWidget {
             ListTile(
               title: Text('Payment Detail'),
               onTap: () {
+                print(uid); // Make sure uid is defined
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AdminPayment()),
+                  MaterialPageRoute(
+                    builder: (context) => PaymentDetailsPage(uid: uid?.toString() ?? ''),
+                  ),
                 );
               },
             ),
@@ -134,9 +140,12 @@ class UserMainPage extends StatelessWidget {
             ListTile(
               title: Text('Family Detail'),
               onTap: () {
+                print(uid); // Make sure uid is defined
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => FamilyPage()),
+                  MaterialPageRoute(
+                    builder: (context) => FamilyDetailPage(uid: uid?.toString() ?? ''), // Convert int? to String
+                  ),
                 );
               },
             ),
@@ -161,7 +170,7 @@ class UserMainPage extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ProfilePage()),
+                    MaterialPageRoute(builder: (context) => UserProfilePage(uid: uid?.toString() ?? '')),
                   );
                 },
               ),
@@ -172,6 +181,7 @@ class UserMainPage extends StatelessWidget {
       ),
 
       body: SingleChildScrollView(
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -217,7 +227,8 @@ class UserMainPage extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            ImageButtonsRow1(),
+            ImageButtonsRow1(uid: uid),
+
             SizedBox(height: 20),
 
             Text(
@@ -225,7 +236,7 @@ class UserMainPage extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            ImageButtonsRow2(),
+            ImageButtonsRow2(uid: uid),
             SizedBox(height: 8),
           ],
         ),
@@ -314,6 +325,10 @@ class _CardWidgetState extends State<CardWidget> {
 }
 
 class ImageButtonsRow1 extends StatelessWidget {
+  int uid;
+  ImageButtonsRow1({required this.uid});
+
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -327,7 +342,7 @@ class ImageButtonsRow1 extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => UserAppointmentPage()),
+              MaterialPageRoute(builder: (context) => UserAppointmentPage(uid: uid?.toString() ?? '')),
             );
           },
         ),
@@ -361,6 +376,10 @@ class ImageButtonsRow1 extends StatelessWidget {
 }
 
 class ImageButtonsRow2 extends StatelessWidget {
+
+  int uid;
+  ImageButtonsRow2({required this.uid});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -374,7 +393,7 @@ class ImageButtonsRow2 extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => AdminPayment()),
+              MaterialPageRoute(builder: (context) => UserPaymentDetailsPage(uid: uid?.toString() ?? '')),
             );
           },
         ),
@@ -395,7 +414,9 @@ class ImageButtonsRow2 extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => FamilyPage()),
+              MaterialPageRoute(
+                builder: (context) => FamilyDetailPage(uid: uid?.toString() ?? ''), // Convert int? to String
+              ),
             );
           },
         ),

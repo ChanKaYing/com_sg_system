@@ -1,288 +1,256 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(RegisterApp());
+
+class FamilyMember {
+  String name;
+  String role;
+  String age;
+
+  FamilyMember({
+    required this.name,
+    required this.role,
+    required this.age,
+  });
 }
 
-class RegisterApp extends StatelessWidget {
+class FamilyPage extends StatelessWidget {
+  final String uid;
+  FamilyPage({required this.uid});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: RegisterPage(),
+      title: 'Family Detail Page',
+      theme: ThemeData(primarySwatch: Colors.blue),
     );
   }
 }
 
-class RegisterPage extends StatefulWidget {
-  @override
-  _RegisterPageState createState() => _RegisterPageState();
-}
+class FamilyDetailPage extends StatelessWidget {
 
-class _RegisterPageState extends State<RegisterPage> {
-  TextEditingController _uidController = TextEditingController();
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _addressController = TextEditingController();
-  TextEditingController _phoneController = TextEditingController();
-
-  bool _isPasswordVisible = false;
-
-  // Regular expression for validating email format
-  final RegExp emailRegex =
-  RegExp(r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-
-  // Regular expression for validating phone number format (11 digits)
-  final RegExp phoneRegex = RegExp(r'^[0-11]{12}$');
-
-  void _registerUser() async {
-    int? uid = int.tryParse(_uidController.text);
-    String name = _nameController.text;
-    String email = _emailController.text;
-    String password = _passwordController.text;
-    String address = _addressController.text;
-    String phone = _phoneController.text;
-
-    if (uid == null ||
-        name.isEmpty ||
-        email.isEmpty ||
-        password.isEmpty ||
-        address.isEmpty ||
-        phone.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text(
-                'Please fill in all fields and ensure UID is a valid integer.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      if (!emailRegex.hasMatch(email)) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Error'),
-              content: Text('Please enter a valid email address.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-        return;
-      }
-
-      if (!phoneRegex.hasMatch(phone)) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Error'),
-              content: Text('Please enter a valid phone number.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-        return;
-      }
-
-      try {
-        CollectionReference users =
-        FirebaseFirestore.instance.collection('users');
-        await users.doc(uid.toString()).set({
-          'uid': uid,
-          'name': name,
-          'email': email,
-          'password': password,
-          'address': address,
-          'phone': phone,
-        });
-
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Success'),
-              content: Text('User registered successfully.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-      } catch (e) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Error'),
-              content: Text('An error occurred while registering user.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-        print('Error: $e');
-      }
-    }
-  }
+  final String uid;
+  FamilyDetailPage({required this.uid});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Register Page'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                height: 200.0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('images/apartment.jpg'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: Card(
-                  color: Colors.white.withOpacity(0.8),
-                  elevation: 8.0,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Create an Account',
-                        style: TextStyle(
-                          fontSize: 24.0,
-                          fontWeight: FontWeight.bold,
-                        ),
+      appBar: AppBar(title: Text('Family Detail')),
+      body: StreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('members')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          final members = (snapshot.data?.docs ?? []).map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return FamilyMember(
+              name: data['name'] ?? '',
+              role: data['role'] ?? '',
+              age: data['age'] ?? '',
+            );
+          }).toList();
+          return ListView.builder(
+            itemCount: members.length,
+            itemBuilder: (context, index) {
+              final member = members[index];
+              return ListTile(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditFamilyMemberPage(
+                        familyMember: member,
+                        uid: uid,
                       ),
-                      SizedBox(height: 16.0),
-                      Text(
-                        'Enter resident simple details to register.',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          color: Colors.grey[60],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 16.0),
-              TextField(
-                controller: _uidController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'UID',
-                  prefixIcon: Icon(Icons.account_circle),
-                ),
-              ),
-              SizedBox(height: 16.0),
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Name',
-                  prefixIcon: Icon(Icons.person),
-                ),
-              ),
-              SizedBox(height: 16.0),
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email),
-                ),
-              ),
-              SizedBox(height: 16.0),
-              TextField(
-                controller: _passwordController,
-                obscureText: !_isPasswordVisible,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: Icon(Icons.lock),
-                  suffixIcon: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
-                    child: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
                     ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 16.0),
-              TextField(
-                controller: _addressController,
-                decoration: InputDecoration(
-                  labelText: 'Address',
-                  prefixIcon: Icon(Icons.location_on),
-                ),
-              ),
-              SizedBox(height: 16.0),
-              TextField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  labelText: 'Phone',
-                  prefixIcon: Icon(Icons.phone),
-                ),
-              ),
-              SizedBox(height: 32.0),
-              ElevatedButton(
-                onPressed: _registerUser,
-                child: Text('Register'),
-              ),
-            ],
-          ),
+                  );
+                },
+                leading: Icon(Icons.person),
+                title: Text(member.name),
+                subtitle: Text('${member.role} - ${member.age} years old'),
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddFamilyMemberPage(uid: uid),
+            ),
+          );
+        },
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class AddFamilyMemberPage extends StatefulWidget {
+  String uid;
+  AddFamilyMemberPage({required this.uid});
+
+  @override
+  _AddFamilyMemberPageState createState() => _AddFamilyMemberPageState();
+}
+
+class _AddFamilyMemberPageState extends State<AddFamilyMemberPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _roleController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Add Family Member')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Name'),
+            ),
+            TextField(
+              controller: _roleController,
+              decoration: InputDecoration(labelText: 'Role'),
+            ),
+            TextField(
+              controller: _ageController,
+              decoration: InputDecoration(labelText: 'Age'),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                final newMember = FamilyMember(
+                  name: _nameController.text,
+                  role: _roleController.text,
+                  age: _ageController.text,
+                );
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(widget.uid)
+                    .collection('members')
+                    .add({
+                  'name': newMember.name,
+                  'role': newMember.role,
+                  'age': newMember.age,
+                });
+                Navigator.pop(context);
+              },
+              child: Text('Add'),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
+class EditFamilyMemberPage extends StatefulWidget {
+  final FamilyMember familyMember;
+  final String uid;
+
+  EditFamilyMemberPage({
+    required this.familyMember,
+    required this.uid,
+  });
+
+  @override
+  _EditFamilyMemberPageState createState() => _EditFamilyMemberPageState();
+}
+
+class _EditFamilyMemberPageState extends State<EditFamilyMemberPage> {
+  late TextEditingController _nameController;
+  late TextEditingController _roleController;
+  late TextEditingController _ageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.familyMember.name);
+    _roleController = TextEditingController(text: widget.familyMember.role);
+    _ageController = TextEditingController(text: widget.familyMember.age);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _roleController.dispose();
+    _ageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Edit Family Member')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Name'),
+            ),
+            TextField(
+              controller: _roleController,
+              decoration: InputDecoration(labelText: 'Role'),
+            ),
+            TextField(
+              controller: _ageController,
+              decoration: InputDecoration(labelText: 'Age'),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                final editedMember = FamilyMember(
+                  name: _nameController.text,
+                  role: _roleController.text,
+                  age: _ageController.text,
+                );
+                final querySnapshot = await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(widget.uid)
+                    .collection('members')
+                    .where('name', isEqualTo: widget.familyMember.name)
+                    .where('role', isEqualTo: widget.familyMember.role)
+                    .where('age', isEqualTo: widget.familyMember.age)
+                    .get();
+
+                if (querySnapshot.docs.isNotEmpty) {
+                  final docId = querySnapshot.docs.first.id;
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(widget.uid)
+                      .collection('members')
+                      .doc(docId)
+                      .update({
+                    'name': editedMember.name,
+                    'role': editedMember.role,
+                    'age': editedMember.age,
+                  });
+                }
+
+                Navigator.pop(context);
+              },
+              child: Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

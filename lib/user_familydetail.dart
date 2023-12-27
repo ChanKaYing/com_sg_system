@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Authentication
+import 'package:firebase_auth/firebase_auth.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(FamilyPage());
-}
 
 class FamilyMember {
   String name;
@@ -22,33 +17,38 @@ class FamilyMember {
 }
 
 class FamilyPage extends StatelessWidget {
+  final String uid;
+  FamilyPage({required this.uid});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Family Detail Page',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: FamilyDetailPage(),
     );
   }
 }
 
 class FamilyDetailPage extends StatelessWidget {
+
+  final String uid;
+  FamilyDetailPage({required this.uid});
+
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser; // Get the authenticated user
-    final userUID = user?.uid; // Get the UID of the authenticated user
-
     return Scaffold(
       appBar: AppBar(title: Text('Family Detail')),
       body: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('familyMembers')
-            .where('userUID', isEqualTo: userUID) // Filter by the current user's UID
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('members')
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return Center(child: CircularProgressIndicator());
           }
-          final familyMembers = (snapshot.data?.docs ?? []).map((doc) {
+          final members = (snapshot.data?.docs ?? []).map((doc) {
             final data = doc.data() as Map<String, dynamic>;
             return FamilyMember(
               name: data['name'] ?? '',
@@ -57,9 +57,9 @@ class FamilyDetailPage extends StatelessWidget {
             );
           }).toList();
           return ListView.builder(
-            itemCount: familyMembers.length,
+            itemCount: members.length,
             itemBuilder: (context, index) {
-              final member = familyMembers[index];
+              final member = members[index];
               return ListTile(
                 onTap: () {
                   Navigator.push(
@@ -67,6 +67,7 @@ class FamilyDetailPage extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => EditFamilyMemberPage(
                         familyMember: member,
+                        uid: uid,
                       ),
                     ),
                   );
@@ -78,14 +79,13 @@ class FamilyDetailPage extends StatelessWidget {
             },
           );
         },
-
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddFamilyMemberPage(),
+              builder: (context) => AddFamilyMemberPage(uid: uid),
             ),
           );
         },
@@ -96,6 +96,9 @@ class FamilyDetailPage extends StatelessWidget {
 }
 
 class AddFamilyMemberPage extends StatefulWidget {
+  String uid;
+  AddFamilyMemberPage({required this.uid});
+
   @override
   _AddFamilyMemberPageState createState() => _AddFamilyMemberPageState();
 }
@@ -134,7 +137,11 @@ class _AddFamilyMemberPageState extends State<AddFamilyMemberPage> {
                   role: _roleController.text,
                   age: _ageController.text,
                 );
-                await FirebaseFirestore.instance.collection('familyMembers').add({
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(widget.uid)
+                    .collection('members')
+                    .add({
                   'name': newMember.name,
                   'role': newMember.role,
                   'age': newMember.age,
@@ -152,8 +159,12 @@ class _AddFamilyMemberPageState extends State<AddFamilyMemberPage> {
 
 class EditFamilyMemberPage extends StatefulWidget {
   final FamilyMember familyMember;
+  final String uid;
 
-  EditFamilyMemberPage({required this.familyMember});
+  EditFamilyMemberPage({
+    required this.familyMember,
+    required this.uid,
+  });
 
   @override
   _EditFamilyMemberPageState createState() => _EditFamilyMemberPageState();
@@ -210,7 +221,9 @@ class _EditFamilyMemberPageState extends State<EditFamilyMemberPage> {
                   age: _ageController.text,
                 );
                 final querySnapshot = await FirebaseFirestore.instance
-                    .collection('familyMembers')
+                    .collection('users')
+                    .doc(widget.uid)
+                    .collection('members')
                     .where('name', isEqualTo: widget.familyMember.name)
                     .where('role', isEqualTo: widget.familyMember.role)
                     .where('age', isEqualTo: widget.familyMember.age)
@@ -219,7 +232,9 @@ class _EditFamilyMemberPageState extends State<EditFamilyMemberPage> {
                 if (querySnapshot.docs.isNotEmpty) {
                   final docId = querySnapshot.docs.first.id;
                   await FirebaseFirestore.instance
-                      .collection('familyMembers')
+                      .collection('users')
+                      .doc(widget.uid)
+                      .collection('members')
                       .doc(docId)
                       .update({
                     'name': editedMember.name,
@@ -238,3 +253,4 @@ class _EditFamilyMemberPageState extends State<EditFamilyMemberPage> {
     );
   }
 }
+
