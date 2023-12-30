@@ -1,18 +1,24 @@
 import 'dart:async';
 
-import 'package:com_sg_system/admin_main.dart';
+import 'package:com_sg_system/camera_in.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:com_sg_system/admin_payment.dart';
+import 'package:com_sg_system/admin_useraccount.dart';
+
+import 'package:com_sg_system/admin_notification.dart';
 import 'package:com_sg_system/facility.dart';
-import 'package:com_sg_system/user_facility.dart';
 import 'package:com_sg_system/user_familydetail.dart';
 import 'package:com_sg_system/login_page.dart';
-import 'package:com_sg_system/user_payment.dart';
-import 'package:com_sg_system/user_profile.dart';
-import 'package:com_sg_system/user_notification.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:com_sg_system/user_pubspace.dart';
+import 'package:com_sg_system/admin_register.dart';
+import 'package:com_sg_system/admin_profile.dart';
+import 'package:com_sg_system/user_notification.dart';
+import 'package:com_sg_system/admin_profile.dart';
+import 'package:flutter/material.dart';
 
+import 'admin_familydetail.dart';
+import 'admin_profile.dart';
 import 'user_appoint_car.dart';
 
 void main() {
@@ -23,7 +29,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Main Page',
+      title: 'Admin Main Page',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -31,22 +37,21 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class UserMainPage extends StatelessWidget {
+class AdminMainPage extends StatelessWidget {
 
-  int uid;
-  UserMainPage({required this.uid});
-  //uid: uid?.toString() ?? ''
+  String adminName;
+  AdminMainPage({required this.adminName});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Welcome, $uid'),
+        title: Text('Welcome, $adminName'), // Display the admin's name in the app bar
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
-              Navigator.pop(
+              Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => LoginApp()),
               );
@@ -89,17 +94,19 @@ class UserMainPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => UserNotificationPage()),
+                  MaterialPageRoute(
+                    builder: (context) => AdminNotificationPage(adminName: adminName), // Pass the admin's name here
+                  ),
                 );
               },
             ),
             ListTile(
               title: Text('Pre-Register'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => UserAppointmentPage(uid: uid?.toString() ?? '')),
-                );
+                //             Navigator.push(
+                //              context,
+                //              MaterialPageRoute(builder: (context) => UserAppointmentPage()),
+                //            );
               },
             ),
             ListTile(
@@ -107,49 +114,61 @@ class UserMainPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => FacilityAppointmentPage(uid: uid?.toString() ?? '')),
+                  MaterialPageRoute(builder: (context) => FacilityPage()),
                 );
               },
             ),
             ListTile(
               title: Text('Public Space'),
               onTap: () {
-        //        Navigator.push(
-        //          context,
-        //          MaterialPageRoute(builder: (context) => PublicSpacePage()),
-        //        );
+    //            Navigator.push(
+    //              context,
+    //              MaterialPageRoute(builder: (context) => PublicSpacePage()),
+    //            );
               },
             ),
             ListTile(
               title: Text('Payment Detail'),
               onTap: () {
-                print(uid); // Make sure uid is defined
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PaymentDetailsPage(uid: uid?.toString() ?? ''),
-                  ),
-                );
+                //      Navigator.push(
+                //        context,
+                //        MaterialPageRoute(builder: (context) => AdminPayment()),
+                //      );
               },
             ),
             ListTile(
               title: Text('Card'),
               onTap: () {
-                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
+                ////////////////////////////////////////////////////////////////////////////////////no item
               },
             ),
             ListTile(
               title: Text('Family Detail'),
               onTap: () {
-                print(uid); // Make sure uid is defined
+                //       Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //           builder: (context) => AdminFamilyPage(uid:adminName),
+                //        ),
+                //      );
+              },
+            ),
+            ListTile(
+              title: Text('Visitor Data'),
+              onTap: () {
+                ////////////////////////////////////////////////////////////////////////////////////no item
+              },
+            ),
+            ListTile(
+              title: Text('Users Account'),
+              onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => FamilyDetailPage(uid: uid?.toString() ?? ''), // Convert int? to String
-                  ),
+                  MaterialPageRoute(builder: (context) => UsersAccountPage()),
                 );
               },
             ),
+
             Container(
               decoration: BoxDecoration(
                 border: Border(
@@ -171,7 +190,7 @@ class UserMainPage extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => UserProfilePage(uid: uid?.toString() ?? '')),
+                    MaterialPageRoute(builder: (context) => AdminProfilePage(adminName: adminName,)),
                   );
                 },
               ),
@@ -181,8 +200,8 @@ class UserMainPage extends StatelessWidget {
         ),
       ),
 
-      body: SingleChildScrollView(
 
+      body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -212,7 +231,9 @@ class UserMainPage extends StatelessWidget {
                       // Navigate to another page here
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => UserNotificationPage()),
+                        MaterialPageRoute(
+                          builder: (context) => AdminNotificationPage(adminName: adminName), // Pass the admin's name here
+                        ),
                       );
                     },
                     child: Text('Click for more'),
@@ -228,8 +249,7 @@ class UserMainPage extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            ImageButtonsRow1(uid: uid),
-
+            ImageButtonsRow1(),
             SizedBox(height: 20),
 
             Text(
@@ -237,7 +257,10 @@ class UserMainPage extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            ImageButtonsRow2(uid: uid),
+            ImageButtonsRow2(uid:adminName, adminName: '',),
+            SizedBox(height: 8),
+
+            ImageButtonsRow3(),
             SizedBox(height: 8),
           ],
         ),
@@ -326,10 +349,6 @@ class _CardWidgetState extends State<CardWidget> {
 }
 
 class ImageButtonsRow1 extends StatelessWidget {
-  int uid;
-  ImageButtonsRow1({required this.uid});
-
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -341,10 +360,10 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 90,
           height: 90,
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => UserAppointmentPage(uid: uid?.toString() ?? '')),
-            );
+            //        Navigator.push(
+            //           context,
+            //         MaterialPageRoute(builder: (context) => UserAppointmentPage()),
+            //       );
           },
         ),
         ImageButtonWithText(
@@ -355,7 +374,7 @@ class ImageButtonsRow1 extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => FacilityAppointmentPage(uid: uid?.toString() ?? '')),
+              MaterialPageRoute(builder: (context) => FacilityPage()),
             );
           },
         ),
@@ -365,10 +384,10 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 95,
           height: 95,
           onPressed: () {
-      //      Navigator.push(
-      //        context,
-      //        MaterialPageRoute(builder: (context) => PublicSpacePage()),
-      //      );
+ //           Navigator.push(
+ //             context,
+ //             MaterialPageRoute(builder: (context) => PublicSpacePage()),
+ //           );
           },
         ),
       ],
@@ -378,8 +397,8 @@ class ImageButtonsRow1 extends StatelessWidget {
 
 class ImageButtonsRow2 extends StatelessWidget {
 
-  int uid;
-  ImageButtonsRow2({required this.uid});
+  String adminName;
+  ImageButtonsRow2({required this.adminName, required String uid});
 
   @override
   Widget build(BuildContext context) {
@@ -394,7 +413,7 @@ class ImageButtonsRow2 extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => UserPaymentDetailsPage(uid: uid?.toString() ?? '')),
+              MaterialPageRoute(builder: (context) => AdminPaymentPage()),
             );
           },
         ),
@@ -416,8 +435,41 @@ class ImageButtonsRow2 extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => FamilyDetailPage(uid: uid?.toString() ?? ''), // Convert int? to String
+                builder: (context) => AdminFamilyPage(),
               ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class ImageButtonsRow3 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ImageButtonWithText(
+          image: AssetImage("images/visitor.png"),
+          text: "Visitor",
+          width: 80,
+          height: 80,
+          onPressed: () {
+            ///////////////////////////////////////////////////////////////////////////////no item
+          },
+        ),
+
+        ImageButtonWithText(
+          image: AssetImage("images/visitor.png"),
+          text: "Camera",
+          width: 80,
+          height: 80,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CamPage()),
             );
           },
         ),

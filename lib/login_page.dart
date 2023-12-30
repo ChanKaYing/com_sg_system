@@ -33,6 +33,10 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue,
+      title: Text('Our Community App'),
+    ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Column(

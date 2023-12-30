@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:com_sg_system/camera_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:com_sg_system/admin_payment.dart';
@@ -9,8 +10,8 @@ import 'package:com_sg_system/admin_notification.dart';
 import 'package:com_sg_system/facility.dart';
 import 'package:com_sg_system/user_familydetail.dart';
 import 'package:com_sg_system/login_page.dart';
-import 'package:com_sg_system/public_space.dart';
-import 'package:com_sg_system/register_page.dart';
+import 'package:com_sg_system/user_pubspace.dart';
+import 'package:com_sg_system/admin_register.dart';
 import 'package:com_sg_system/admin_profile.dart';
 import 'package:com_sg_system/user_notification.dart';
 import 'package:com_sg_system/admin_profile.dart';
@@ -18,7 +19,7 @@ import 'package:flutter/material.dart';
 
 import 'admin_familydetail.dart';
 import 'admin_profile.dart';
-import 'user_appointment.dart';
+import 'user_appoint_car.dart';
 
 void main() {
   runApp(MyApp());
@@ -120,10 +121,10 @@ class AdminMainPage extends StatelessWidget {
             ListTile(
               title: Text('Public Space'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PublicSpacePage()),
-                );
+    //            Navigator.push(
+    //              context,
+    //              MaterialPageRoute(builder: (context) => PubSpaceAppointmentPage(adminName: adminName)),
+    //            );
               },
             ),
             ListTile(
@@ -348,6 +349,10 @@ class _CardWidgetState extends State<CardWidget> {
 }
 
 class ImageButtonsRow1 extends StatelessWidget {
+
+ // String adminName;
+ // ImageButtonsRow1({required this.adminName, required String uid});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -383,10 +388,10 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 95,
           height: 95,
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => PublicSpacePage()),
-            );
+    //        Navigator.push(
+    //          context,
+    //          MaterialPageRoute(builder: (context) => PubSpaceAppointmentPage(adminName: adminName)),
+    //        );
           },
         ),
       ],
@@ -469,6 +474,19 @@ class ImageButtonsRow3 extends StatelessWidget {
           height: 80,
           onPressed: () {
             ///////////////////////////////////////////////////////////////////////////////no item
+          },
+        ),
+
+        ImageButtonWithText(
+          image: AssetImage("images/visitor.png"),
+          text: "Camera",
+          width: 80,
+          height: 80,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CamPage()),
+            );
           },
         ),
       ],
