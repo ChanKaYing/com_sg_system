@@ -124,7 +124,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
           if(scan.contains(oo)){
             print("approve");
-            approve="Approve!";
+            approve="Member Check Out Approve!";
           }
         }
 
@@ -138,10 +138,10 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           String oo= plate.toString();
           print("ooooooooooooooooooooooooL");
 
-          if(scan.contains(oo) && DateTime.now().isAfter(DateTime.parse(estimateCheckin).subtract(Duration(minutes: 15))) && DateTime.now().isBefore(DateTime.parse(estimateCheckin).add(Duration(minutes: 15))) ){
+          if(scan.contains(oo)){
             print("approve!!!");
-            approve="Visitor Approve!!!";
-            saveRealTime(doc.id);
+            approve="Visitor Check Out Approve!!!";
+            saveCheckOut(doc.id);
           }
         }
       });
@@ -157,15 +157,53 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     }
   }
 
-  void saveRealTime(String docID) async {
+  void saveCheckOut(String docID) async {
     try {
+      QuerySnapshot visitorQuerySnapshot = await _firestore.collection("carregister").get();
+
+      for (var doc in visitorQuerySnapshot.docs) {
+        if(doc.id == docID){
+          var plate = doc['plate'];
+          var estimateCheckinDate = doc['checkindate'];
+          var estimateCheckTime = doc['checkintime'];
+          var name = doc['name'];
+          var realCheckinDate = doc['realcheckindate'];
+          var realCheckinTime = doc['realcheckintime'];
+          var uid = doc['uid'];
+
+          FirebaseFirestore.instance
+              .collection('datavisitors')
+              .add({
+            'plate':plate,
+            'checkindate': estimateCheckinDate,
+            'checkintime': estimateCheckTime,
+            'name': name,
+            'realcheckindate': realCheckinDate,
+            'realcheckintime': realCheckinTime,
+            'uid': uid,
+            'realcheckoutdate': _formatDate(DateTime.now()),
+            'realcheckouttime': _formatTime(TimeOfDay.now()),
+          });
+
+          await FirebaseFirestore.instance
+              .collection('carregister')
+              .doc(docID)
+              .delete();
+
+          break;
+        }
+      }
+
+
+/*
       FirebaseFirestore.instance
-          .collection('carregister')
+          .collection('datavisitors')
           .doc(docID)
-          .update({
-        'realcheckindate': _formatDate(DateTime.now()),
-        'realcheckintime': _formatTime(TimeOfDay.now()),
-      });
+          .add({
+        'realcheckoutdate': _formatDate(DateTime.now()),
+        'realcheckouttime': _formatTime(TimeOfDay.now()),
+      });*/
+
 
       // Data added successfully
       print('Data added to Firestore!');

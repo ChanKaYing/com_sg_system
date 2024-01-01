@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:com_sg_system/admin_appoint_car.dart';
 import 'package:com_sg_system/camera_in.dart';
+import 'package:com_sg_system/emergency_detail.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:com_sg_system/admin_payment.dart';
@@ -261,6 +264,7 @@ class AdminMainPage extends StatelessWidget {
             SizedBox(height: 8),
 
             ImageButtonsRow3(),
+
             SizedBox(height: 8),
           ],
         ),
@@ -289,11 +293,15 @@ class _CardWidgetState extends State<CardWidget> {
   final double _fixedImageWidth = 250;
 
   late Timer _timer;
+  late Timer _timer2;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
     super.initState();
     _timer = Timer.periodic(Duration(seconds: 3), _swapImage);
+    _timer2= Timer.periodic(Duration(seconds: 3), _emergency);
   }
 
   void _swapImage(Timer timer) {
@@ -302,9 +310,36 @@ class _CardWidgetState extends State<CardWidget> {
     });
   }
 
+
+  Future<void> _emergency(Timer t) async {
+    QuerySnapshot querySnapshot = await _firestore.collection('emergency').get();
+    if(querySnapshot.docs.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('EMERGENCY'),
+            action: SnackBarAction(
+              label: 'Check More',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EmergencyDetail()),
+                );
+              },
+            )
+        ),
+      );
+    }
+
+  }
+
+
+
+
+
   @override
   void dispose() {
     _timer.cancel();
+    _timer2.cancel();
     super.dispose();
   }
 
@@ -364,10 +399,10 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 90,
           height: 90,
           onPressed: () {
-            //        Navigator.push(
-            //           context,
-            //         MaterialPageRoute(builder: (context) => UserAppointmentPage()),
-            //       );
+                    Navigator.push(
+                       context,
+                     MaterialPageRoute(builder: (context) => AdminDisplayAppointments()),
+                   );
           },
         ),
         ImageButtonWithText(

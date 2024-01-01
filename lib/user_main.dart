@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:com_sg_system/admin_main.dart';
 import 'package:com_sg_system/admin_payment.dart';
 import 'package:com_sg_system/facility.dart';
@@ -35,7 +36,18 @@ class UserMainPage extends StatelessWidget {
 
   int uid;
   UserMainPage({required this.uid});
+  String notiText = "";
+  late Timer _timer;
   //uid: uid?.toString() ?? ''
+
+  @override
+  void initState() {
+    _timer = Timer.periodic(Duration(seconds: 3), getNotiText);
+  }
+
+  Future<void> getNotiText(Timer t) async{
+    notiText="lala";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,10 +126,10 @@ class UserMainPage extends StatelessWidget {
             ListTile(
               title: Text('Public Space'),
               onTap: () {
-        //        Navigator.push(
-        //          context,
-        //          MaterialPageRoute(builder: (context) => PublicSpacePage()),
-        //        );
+                //        Navigator.push(
+                //          context,
+                //          MaterialPageRoute(builder: (context) => PublicSpacePage()),
+                //        );
               },
             ),
             ListTile(
@@ -201,8 +213,7 @@ class UserMainPage extends StatelessWidget {
               color: Colors.grey[200], // Notification bar background color
               child: Column(
                 children: [
-                  Text(
-                    'Payment Detail: Your community maintenance fee is due, please pay it before September 1st',
+                  Text(notiText,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 14),
                   ),
@@ -242,10 +253,85 @@ class UserMainPage extends StatelessWidget {
           ],
         ),
       ),
+
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context){
+              return AlertDialog(
+                title: Text('Emergency Button'),
+                content: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        IconButton(
+                          icon: Icon(Icons.local_fire_department),
+                          onPressed: () {
+                            ////////////////////////////////////////////////////////////////
+                            Navigator.of(context).pop();
+                            _emergency(uid.toString(),'Fire');
+                          },
+                        ),
+
+                        IconButton(
+                          icon: Icon(Icons.pool_rounded),
+                          onPressed: () {
+                            ////////////////////////////////////////////////////////////////
+                            Navigator.of(context).pop();
+                            _emergency(uid.toString(),'Drowning');
+                          },
+                        ),
+                        SizedBox(height: 16.0),
+                      ]),
+
+                      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        IconButton(
+                          icon: Icon(Icons.local_fire_department),
+                          onPressed: () {
+                            ////////////////////////////////////////////////////////////////
+                            Navigator.of(context).pop();
+                            _emergency(uid.toString(),'Thief');
+                          },
+                        ),
+
+                        IconButton(
+                          icon: Icon(Icons.help_rounded),
+                          onPressed: () {
+                            ////////////////////////////////////////////////////////////////
+                            Navigator.of(context).pop();
+                            _emergency(uid.toString(),'Other');
+                          },
+                        ),
+                        SizedBox(height: 16.0),
+                      ]),
+
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+
     );
   }
-}
 
+  void _emergency(String ID, String type) {
+    FirebaseFirestore.instance
+        .collection('emergency')
+        .add({
+      'ID':ID,
+      'emergencyType': type,
+    });
+
+  }
+
+
+}
 
 
 class CardWidget extends StatefulWidget {
@@ -326,12 +412,30 @@ class _CardWidgetState extends State<CardWidget> {
 }
 
 class ImageButtonsRow1 extends StatelessWidget {
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
   int uid;
+  bool paid=false;
   ImageButtonsRow1({required this.uid});
+
+  Future<void> isPaid() async{
+    QuerySnapshot querySnapshot = await _firestore.collection('users').get();
+    for(var doc in querySnapshot.docs){
+      if(doc.id== uid.toString() && doc['member']=="1"){
+        paid=true;
+        print("True");
+        break;
+      }
+      else{
+        print("False");
+        paid=false;
+      }
+    }
+  }
 
 
   @override
   Widget build(BuildContext context) {
+    isPaid();
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -353,9 +457,16 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 80,
           height: 90,
           onPressed: () {
+            print("Paid= ${paid}");
+            paid?
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => FacilityAppointmentPage(uid: uid?.toString() ?? '')),
+            )
+                :ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('You are not allowed to make appointment. You are not member'),
+              ),
             );
           },
         ),
@@ -365,10 +476,10 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 95,
           height: 95,
           onPressed: () {
-      //      Navigator.push(
-      //        context,
-      //        MaterialPageRoute(builder: (context) => PublicSpacePage()),
-      //      );
+            //      Navigator.push(
+            //        context,
+            //        MaterialPageRoute(builder: (context) => PublicSpacePage()),
+            //      );
           },
         ),
       ],

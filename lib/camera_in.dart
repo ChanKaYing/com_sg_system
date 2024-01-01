@@ -50,6 +50,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   CameraController? _cameraController;
   final textRecognizer = TextRecognizer();
   Timer? timer;
+  Timer? timer2;
 
   @override
   void initState() {
@@ -58,6 +59,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
     _future = _requestCameraPermission();
     timer = Timer.periodic(Duration(seconds: 5), (Timer t) => _scanImage());
+    timer2= Timer.periodic(Duration(seconds: 60), (Timer t) => _overtimeDelete());
   }
 
   @override
@@ -66,6 +68,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     _stopCamera();
     textRecognizer.close();
     timer?.cancel();
+    timer2?.cancel();
     super.dispose();
   }
 
@@ -138,7 +141,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           String oo= plate.toString();
           print("ooooooooooooooooooooooooL");
 
-          if(scan.contains(oo) && DateTime.now().isAfter(DateTime.parse(estimateCheckin).subtract(Duration(minutes: 15))) && DateTime.now().isBefore(DateTime.parse(estimateCheckin).add(Duration(minutes: 15))) ){
+          if(scan.contains(oo) && DateTime.now().isAfter(DateTime.parse(estimateCheckin).subtract(Duration(minutes: 30))) && DateTime.now().isBefore(DateTime.parse(estimateCheckin).add(Duration(minutes: 30))) ){
             print("approve!!!");
             approve="Visitor Approve!!!";
             saveRealTime(doc.id);
@@ -427,6 +430,26 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       );
     }
   }
+
+  Future<void> _overtimeDelete() async {
+    QuerySnapshot visitorQuerySnapshot = await _firestore.collection("carregister").get();
+    // save
+    for (var doc in visitorQuerySnapshot.docs) {
+      // Accessing the 'plate' field from each document
+      var estimateCheckin = doc['checkindate']+" "+doc['checkintime'];
+
+      if(DateTime.now().isAfter(DateTime.parse(estimateCheckin).add(Duration(minutes: 30)))){
+        print("registerAgainnnnnnnnnnnnnnnnnnn");
+        await FirebaseFirestore.instance
+            .collection('carregister')
+            .doc(doc.id)
+            .delete();
+        break;
+      }
+    }
+  }
+
+
 }
 
 class ResultScreen extends StatefulWidget {
