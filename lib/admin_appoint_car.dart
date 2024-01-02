@@ -20,7 +20,16 @@ class AdminDisplayAppointments extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
+
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Visitor Car Register by Resident'),
+
+
+        ),
+        body: StreamBuilder(
+
+
       stream: FirebaseFirestore.instance.collection('carregister').snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) {
@@ -30,7 +39,7 @@ class AdminDisplayAppointments extends StatelessWidget {
         }
 
         return Container(
-          height: 300,
+
           child: ListView(
             children: snapshot.data!.docs.map((document)
         {
@@ -91,6 +100,7 @@ class AdminDisplayAppointments extends StatelessWidget {
           ),
         );
       },
+    ),
     );
   }
 }

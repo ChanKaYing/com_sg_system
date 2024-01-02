@@ -40,14 +40,6 @@ class UserMainPage extends StatelessWidget {
   late Timer _timer;
   //uid: uid?.toString() ?? ''
 
-  @override
-  void initState() {
-    _timer = Timer.periodic(Duration(seconds: 3), getNotiText);
-  }
-
-  Future<void> getNotiText(Timer t) async{
-    notiText="lala";
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,10 +118,10 @@ class UserMainPage extends StatelessWidget {
             ListTile(
               title: Text('Public Space'),
               onTap: () {
-                //        Navigator.push(
-                //          context,
-                //          MaterialPageRoute(builder: (context) => PublicSpacePage()),
-                //        );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => PubSpaceAppointmentPage(uid: uid?.toString() ?? ''),),
+                        );
               },
             ),
             ListTile(
@@ -144,12 +136,7 @@ class UserMainPage extends StatelessWidget {
                 );
               },
             ),
-            ListTile(
-              title: Text('Card'),
-              onTap: () {
-                ///////////////////////////////////////////////////////////////////////////////////////////////////no item
-              },
-            ),
+
             ListTile(
               title: Text('Family Detail'),
               onTap: () {
@@ -199,7 +186,7 @@ class UserMainPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             CardWidget(),
-
+            /*
             SizedBox(height: 8),
 
             Text(
@@ -231,7 +218,7 @@ class UserMainPage extends StatelessWidget {
                 ],
               ),
             ),
-
+            */
             SizedBox(height: 20),
 
             Text(
@@ -256,6 +243,8 @@ class UserMainPage extends StatelessWidget {
 
 
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.red,
+        child: Icon(Icons.sos_outlined, color: Colors.white,),
         onPressed: () {
           showDialog(
             context: context,
@@ -268,16 +257,16 @@ class UserMainPage extends StatelessWidget {
                     children: [
                       Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         IconButton(
-                          icon: Icon(Icons.local_fire_department),
+                          icon: Icon(Icons.local_fire_department, size: 70,),
                           onPressed: () {
                             ////////////////////////////////////////////////////////////////
                             Navigator.of(context).pop();
                             _emergency(uid.toString(),'Fire');
                           },
                         ),
-
+                        SizedBox(width: 70,),
                         IconButton(
-                          icon: Icon(Icons.pool_rounded),
+                          icon: Icon(Icons.pool_rounded,size: 70,),
                           onPressed: () {
                             ////////////////////////////////////////////////////////////////
                             Navigator.of(context).pop();
@@ -287,25 +276,28 @@ class UserMainPage extends StatelessWidget {
                         SizedBox(height: 16.0),
                       ]),
 
+                      SizedBox(height: 70,),
+
                       Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         IconButton(
-                          icon: Icon(Icons.local_fire_department),
+                          icon: Icon(Icons.local_fire_department,  size: 70,),
                           onPressed: () {
                             ////////////////////////////////////////////////////////////////
                             Navigator.of(context).pop();
                             _emergency(uid.toString(),'Thief');
                           },
                         ),
-
+                        SizedBox(width: 70,),
                         IconButton(
-                          icon: Icon(Icons.help_rounded),
+                          icon: Icon(Icons.help_rounded,  size: 70,),
                           onPressed: () {
                             ////////////////////////////////////////////////////////////////
                             Navigator.of(context).pop();
                             _emergency(uid.toString(),'Other');
                           },
                         ),
-                        SizedBox(height: 16.0),
+                        SizedBox(height: 30.0),
+
                       ]),
 
                     ],
@@ -340,7 +332,11 @@ class CardWidget extends StatefulWidget {
 }
 
 class _CardWidgetState extends State<CardWidget> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   int _currentIndex = 0;
+  String notiText="";
+  List<String> notiList=['Welcome Back'];//////////////////////////////////////////////////////////////////////////////bug
+  int _notiIndex = 0;
 
   List<String> _imagePaths = [
     "images/pool1.png",
@@ -352,11 +348,17 @@ class _CardWidgetState extends State<CardWidget> {
   final double _fixedImageWidth = 250;
 
   late Timer _timer;
+  late Timer _timer2;
+  late Timer _timer3;
+  late Timer _timer4;
 
   @override
   void initState() {
     super.initState();
     _timer = Timer.periodic(Duration(seconds: 3), _swapImage);
+    _timer2 = Timer.periodic(Duration(seconds: 5), getNotiList);
+    _timer3 = Timer.periodic(Duration(seconds: 2), changeNotiText);
+    _timer4 = Timer.periodic(Duration(seconds: 60), refreshCarRegister);
   }
 
   void _swapImage(Timer timer) {
@@ -365,9 +367,47 @@ class _CardWidgetState extends State<CardWidget> {
     });
   }
 
+  Future<void> getNotiList(Timer t) async {
+    QuerySnapshot querySnapshot = await _firestore.collection("notifications").get();
+    for(var doc in querySnapshot.docs){
+      notiList.add(doc['title']+": "+doc['details']);
+    }
+  }
+  Future<void> changeNotiText(Timer t) async{
+    _notiIndex++;
+    if(notiList.length!=0){
+      print("KEKE");
+      print(notiList.length);
+      notiText = notiList[_notiIndex % notiList.length];
+    }
+    else{
+      notiText = "Welcome Back";
+    }
+    print("PPIPI");
+    print(_notiIndex);
+  }
+
+  Future<void> refreshCarRegister(Timer t) async{
+    QuerySnapshot querySnapshot = await _firestore.collection('carregister').get();
+    for(var doc in querySnapshot.docs){
+      var estimateCheckin = doc['checkindate']+" "+doc['checkintime'];
+      print(estimateCheckin);
+      if(DateTime.now().isAfter(DateTime.parse(estimateCheckin).add(Duration(minutes: 30)))){
+        print("DELETE CARREG OF ${doc.id}");
+        await FirebaseFirestore.instance
+            .collection('carregister')
+            .doc(doc.id)
+            .delete();
+      }
+    }
+  }
+
   @override
   void dispose() {
     _timer.cancel();
+    _timer2.cancel();
+    _timer3.cancel();
+    _timer4.cancel();
     super.dispose();
   }
 
@@ -377,8 +417,7 @@ class _CardWidgetState extends State<CardWidget> {
         margin: EdgeInsets.all(8),
         child:Container(
           width: 300, // Set the fixed width for the card
-          height: 270, // Set the fixed height for the card
-
+          height: 500, // Set the fixed height for the card
           child:Padding(
             padding: EdgeInsets.all(16),
             child: Row(
@@ -400,13 +439,48 @@ class _CardWidgetState extends State<CardWidget> {
                         height: _fixedImageWidth * (3 / 4), // Calculate height based on original aspect ratio
 
                       ),
+                      SizedBox(height: 10),
+                      Expanded(child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                            height: 200,
+                            color: Colors.grey[200], // Notification bar background color
+                            child: Column(
+                              children: [
+                                Text("Notification",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                                ),
+                                Text(notiText,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 15),
+                                ),
+                                SizedBox(height: 10),
+                                Spacer(),// Adding some spacing between the two Text widgets
+                                TextButton(
+                                  onPressed: () {
+                                    // Navigate to another page here
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => UserNotificationPage()),
+                                    );
+                                  },
+                                  child: Text('Click for more'),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      )),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-        )
+        )////////////
     );
   }
 }
@@ -473,13 +547,20 @@ class ImageButtonsRow1 extends StatelessWidget {
         ImageButtonWithText(
           image: AssetImage("images/publicspace.png"),
           text: "Public Space",
-          width: 95,
-          height: 95,
+          width: 90,
+          height: 90,
           onPressed: () {
-            //      Navigator.push(
-            //        context,
-            //        MaterialPageRoute(builder: (context) => PublicSpacePage()),
-            //      );
+            print("Paid= ${paid}");
+            paid?
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PubSpaceAppointmentPage(uid: uid?.toString() ?? '')),
+                  )
+            :ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('You are not allowed to make appointment. You are not member'),
+            ),
+            );
           },
         ),
       ],
@@ -532,6 +613,9 @@ class ImageButtonsRow2 extends StatelessWidget {
             );
           },
         ),
+        SizedBox(height: 16,)
+
+
       ],
     );
   }

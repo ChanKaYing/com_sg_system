@@ -2,23 +2,23 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class UserPubSpaceAppointmentPage extends StatefulWidget {
+class PubSpaceAppointmentPage extends StatefulWidget {
   final String uid;
-  UserPubSpaceAppointmentPage({required this.uid});
+  PubSpaceAppointmentPage({required this.uid});
 
   @override
-  _UserPubSpaceAppointmentPageState createState() => _UserPubSpaceAppointmentPageState(uid: uid);
+  _PubSpaceAppointmentPageState createState() => _PubSpaceAppointmentPageState(uid: uid);
 }
 
-class _UserPubSpaceAppointmentPageState extends State<UserPubSpaceAppointmentPage> {
+class _PubSpaceAppointmentPageState extends State<PubSpaceAppointmentPage> {
   final String uid;
-  _UserPubSpaceAppointmentPageState({required this.uid});
+  _PubSpaceAppointmentPageState({required this.uid});
 
   TextEditingController _nameController = TextEditingController();
   DateTime _checkInDate = DateTime.now();
-  TimeOfDay _checkInTime = TimeOfDay.now();
 
-  String _numPeople = '';
+
+  String _reason = '';
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -35,22 +35,11 @@ class _UserPubSpaceAppointmentPageState extends State<UserPubSpaceAppointmentPag
     }
   }
 
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: _checkInTime,
-    );
 
-    if (picked != null) {
-      setState(() {
-        _checkInTime = picked;
-      });
-    }
-  }
 
   Future<void> _submitData() async {
 
-    if (_nameController.text.isEmpty || _numPeople.isEmpty) {
+    if (_nameController.text.isEmpty || _reason.isEmpty) {
       // Notify the user if any required fields are empty
       showDialog(
         context: context,
@@ -76,15 +65,14 @@ class _UserPubSpaceAppointmentPageState extends State<UserPubSpaceAppointmentPag
     Map<String, dynamic> userData = {
       'name': _nameController.text,
       'checkindate': _formatDate(_checkInDate),
-      'checkintime': _formatTime(_checkInTime),
-      'numpeople': _numPeople,
+      'reason': _reason,
       'uid':uid,
 
     };
 
     try {
       await firestore
-          .collection('facility')
+          .collection('pubspace')
           .add(userData);
 
       // Data added successfully
@@ -113,13 +101,9 @@ class _UserPubSpaceAppointmentPageState extends State<UserPubSpaceAppointmentPag
 
   @override
   Widget build(BuildContext context) {
-
-    String _selectedValue = '1';
-    List<String> _dropdownValues = ['1', '2', '3'];
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pre-Register for Visitor'),
+        title: Text('Rent Public Space'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -130,7 +114,7 @@ class _UserPubSpaceAppointmentPageState extends State<UserPubSpaceAppointmentPag
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'Visitor Name',
+                  labelText: 'Person in Charge',
                 ),
               ),
 
@@ -141,7 +125,7 @@ class _UserPubSpaceAppointmentPageState extends State<UserPubSpaceAppointmentPag
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Check-in Date:',
+                        'Which Day:',
                         style: TextStyle(fontSize: 16),
                       ),
                       SizedBox(height: 10.0),
@@ -159,54 +143,21 @@ class _UserPubSpaceAppointmentPageState extends State<UserPubSpaceAppointmentPag
                   ),
                   SizedBox(width: 10.0),
                 ]),
-                SizedBox(height: 20.0),
-                Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Check-in Time:',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        SizedBox(height: 10.0),
-                        Text(
-                          '${_checkInTime.format(context)}',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ],
-                    ),
 
-                    SizedBox(width: 16.0),
-                    ElevatedButton(
-                      onPressed: () => _selectTime(context),
-                      child: Text('Select Time'),
-                    ),
-                  ],
-                ),
               ]),
               SizedBox(height: 16.0),
 
+              TextField(
+                onChanged: (value) {
+                  setState(() {
+                    _reason = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: 'Register for (reason): ',
+                ),
+              ),
 
- //DropdownButtonFormField<String>(
-              //              items: [DropdownMenuItem<String>(child:Text("test"))],
-              //           ),
-
-            DropdownButtonFormField<String>(
-              value: _selectedValue,
-              items: _dropdownValues.map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (newValue) {
-                setState(() {
-                  _selectedValue = newValue!;
-                  // Perform any other actions based on the selected value
-                });
-              },
-            ),
 
               SizedBox(height: 32.0),
               ElevatedButton(
@@ -258,7 +209,7 @@ class DisplayAppointments extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: FirebaseFirestore.instance
-          .collection('facility')
+          .collection('pubspace')
           .snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) {
@@ -275,20 +226,15 @@ class DisplayAppointments extends StatelessWidget {
 
               void _deleteData() async {
                 await FirebaseFirestore.instance
-                    .collection('facility')
+                    .collection('pubspace')
                     .doc(document.id)
                     .delete();
               }
 
               void _editData() {
                 TextEditingController nameController = TextEditingController(text: data['name']);
-                TextEditingController plateController = TextEditingController(text: data['plate']);
+                TextEditingController reasonController = TextEditingController(text: data['reason']);
                 DateTime selectedDate = DateTime.parse(data['checkindate']);
-                TimeOfDay selectedTime = TimeOfDay(
-                  hour: int.parse(data['checkintime'].split(':')[0]),
-                  minute: int.parse(data['checkintime'].split(':')[1]),
-                );
-
 
 
                 showDialog(
@@ -309,11 +255,13 @@ class DisplayAppointments extends StatelessWidget {
                             SizedBox(height: 16.0),
 
                             TextField(
-                              controller: plateController,
+                              controller: reasonController,
                               decoration: InputDecoration(
-                                  labelText: 'Number of people'),
+                                  labelText: 'Register for (reason): '),
                             ),
                             SizedBox(height: 16.0),
+
+
 
 //////////////////////////////////////////////////////////////////////////////////
                             Column(
@@ -353,33 +301,7 @@ class DisplayAppointments extends StatelessWidget {
                             SizedBox(height: 16.0),
 
 //////////////////////////////////////////////////////////////////////////////////
-                            Row(
-                              children: [
-                                Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Selected Time: '),
-                                      Text('${selectedTime.format(context)}'),
-                                      SizedBox(width: 10.0),
-                                    ]),
-///////////////////////////////////////////////////////////////////////////////////////////////
-                                Spacer(),
-                                TextButton(
-                                  onPressed: () async {
-                                    final TimeOfDay? picked =
-                                    await showTimePicker(
-                                      context: context,
-                                      initialTime: selectedTime,
-                                    );
-                                    if (picked != null) {
-                                      selectedTime = picked;
-                                    }
-                                  },
-                                  child: Text('Select Time'),
-                                ),
-                              ],
-                            ),
+
                           ],
                         ),
                       ),
@@ -392,9 +314,8 @@ class DisplayAppointments extends StatelessWidget {
                                 .doc(document.id)
                                 .update({
                               'name': nameController.text,
-                              'plate': plateController.text,
+                              'reason': reasonController.text,
                               'checkindate': _formatDate(selectedDate),
-                              'checkintime': _formatTime(selectedTime),
 
                             });
                             Navigator.of(context).pop(); // Close the dialog
@@ -414,15 +335,14 @@ class DisplayAppointments extends StatelessWidget {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Check-in: ${_formatDate(DateTime.parse(data['checkindate']))} ${data['checkintime']}'),
-                      Text('License Plate: ${data['plate']}'),
+                      Text('Day: ${_formatDate(DateTime.parse(data['checkindate']))} '),
+                      Text('Reason: ${data['reason']}'),
                       Text('UID:  ${data['uid']}'),
                     ],
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-
                       IconButton(
                         icon: Icon(Icons.edit),
                         onPressed: () {

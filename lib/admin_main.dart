@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:com_sg_system/admin_appoint_car.dart';
+import 'package:com_sg_system/admin_appoint_facility.dart';
 import 'package:com_sg_system/camera_in.dart';
 import 'package:com_sg_system/emergency_detail.dart';
+import 'package:com_sg_system/visitor_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:com_sg_system/admin_payment.dart';
@@ -43,10 +45,21 @@ class MyApp extends StatelessWidget {
 class AdminMainPage extends StatelessWidget {
 
   String adminName;
+  bool isguard=false;
   AdminMainPage({required this.adminName});
+
+  Future<void> isGuard() async{
+    if(adminName=="guard"){
+      isguard=true;
+    }
+    else{
+      isguard=false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    isGuard();
     return Scaffold(
       appBar: AppBar(
         title: Text('Welcome, $adminName'), // Display the admin's name in the app bar
@@ -117,7 +130,7 @@ class AdminMainPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => FacilityPage()),
+                  MaterialPageRoute(builder: (context) => AdminAppointFacility()),
                 );
               },
             ),
@@ -139,12 +152,7 @@ class AdminMainPage extends StatelessWidget {
                 //      );
               },
             ),
-            ListTile(
-              title: Text('Card'),
-              onTap: () {
-                ////////////////////////////////////////////////////////////////////////////////////no item
-              },
-            ),
+
             ListTile(
               title: Text('Family Detail'),
               onTap: () {
@@ -165,9 +173,16 @@ class AdminMainPage extends StatelessWidget {
             ListTile(
               title: Text('Users Account'),
               onTap: () {
+                print("ISGUARD? = ${isguard}");
+                !isguard?
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => UsersAccountPage()),
+                )
+                    :ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('You are not allowed to access'),
+                  ),
                 );
               },
             ),
@@ -263,7 +278,7 @@ class AdminMainPage extends StatelessWidget {
             ImageButtonsRow2(uid:adminName, adminName: '',),
             SizedBox(height: 8),
 
-            ImageButtonsRow3(),
+            ImageButtonsRow3(uid:adminName, adminName: adminName,),
 
             SizedBox(height: 8),
           ],
@@ -413,15 +428,15 @@ class ImageButtonsRow1 extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => FacilityPage()),
+              MaterialPageRoute(builder: (context) => AdminAppointFacility()),
             );
           },
         ),
         ImageButtonWithText(
           image: AssetImage("images/publicspace.png"),
           text: "Public Space",
-          width: 95,
-          height: 95,
+          width: 90,
+          height: 90,
           onPressed: () {
     //        Navigator.push(
     //          context,
@@ -456,15 +471,7 @@ class ImageButtonsRow2 extends StatelessWidget {
             );
           },
         ),
-        ImageButtonWithText(
-          image: AssetImage("images/card.png"),
-          text: "Card",
-          width: 80,
-          height: 80,
-          onPressed: () {
-            ///////////////////////////////////////////////////////////////////////////////no item
-          },
-        ),
+
         ImageButtonWithText(
           image: AssetImage("images/family.png"),
           text: "Family Detail",
@@ -485,8 +492,25 @@ class ImageButtonsRow2 extends StatelessWidget {
 }
 
 class ImageButtonsRow3 extends StatelessWidget {
+
+  String adminName;
+  ImageButtonsRow3({required this.adminName, required String uid});
+
+  bool isguard=false;
+
+
+  Future<void> isGuard() async{
+    if(adminName=="guard"){
+      isguard=true;
+    }
+    else{
+      isguard=false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    isGuard();
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -496,9 +520,17 @@ class ImageButtonsRow3 extends StatelessWidget {
           width: 80,
           height: 80,
           onPressed: () {
+            print("ISGUARD? = ${isguard}");
+            print("ADMINNAME? = ${adminName}");
+            !isguard?
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => UsersAccountPage()),
+            )
+                :ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('You are not allowed to access'),
+              ),
             );
           },
         ),
@@ -508,8 +540,11 @@ class ImageButtonsRow3 extends StatelessWidget {
           width: 80,
           height: 80,
           onPressed: () {
-            ///////////////////////////////////////////////////////////////////////////////no item
-          },
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => VisitorData()),
+            );
+            },
         ),
 
         ImageButtonWithText(

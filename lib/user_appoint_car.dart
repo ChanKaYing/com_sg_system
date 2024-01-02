@@ -244,6 +244,7 @@ class DisplayAppointments extends StatelessWidget {
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('carregister')
+          .where('uid',isEqualTo: uid)
           .snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) {
@@ -251,6 +252,7 @@ class DisplayAppointments extends StatelessWidget {
             child: CircularProgressIndicator(),
           );
         }
+
 
         return Container(
           height: 300,
@@ -293,10 +295,16 @@ class DisplayAppointments extends StatelessWidget {
                               decoration: InputDecoration(labelText: 'Car License Plate'),
                             ),
                             SizedBox(height: 16.0),
+
                             Row(
                               children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                Text('Selected Date: '),
+                                Text('${_formatDate(selectedDate)}'),
+                      ]),
 
-                                Text('Selected Date: ${_formatDate(selectedDate)}'),
                                 SizedBox(width: 10.0),
                                 Spacer(),
                                 TextButton(
@@ -319,7 +327,13 @@ class DisplayAppointments extends StatelessWidget {
                             SizedBox(height: 16.0),
                             Row(
                               children: [
-                                Text('Selected Time: ${selectedTime.format(context)}'),
+                                Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+
+                                Text('Selected Time: '),
+                                Text('${selectedTime.format(context)}'),
+                                ]),
                                 SizedBox(width: 10.0),
                                 Spacer(),
                                 TextButton(
