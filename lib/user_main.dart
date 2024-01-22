@@ -33,16 +33,32 @@ class MyApp extends StatelessWidget {
 }
 
 class UserMainPage extends StatelessWidget {
-
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   int uid;
   UserMainPage({required this.uid});
   String notiText = "";
   late Timer _timer;
-  //uid: uid?.toString() ?? ''
+
+  bool paid=false;
+  Future<void> isPaid() async{
+    QuerySnapshot querySnapshot = await _firestore.collection('users').get();
+    for(var doc in querySnapshot.docs){
+      if(doc.id== uid.toString() && doc['member']=="1"){
+        paid=true;
+        print("True");
+        break;
+      }
+      else{
+        print("False");
+        paid=false;
+      }
+    }
+  }
 
 
   @override
   Widget build(BuildContext context) {
+    isPaid();
     return Scaffold(
       appBar: AppBar(
         title: Text('Welcome, $uid'),
@@ -109,9 +125,16 @@ class UserMainPage extends StatelessWidget {
             ListTile(
               title: Text('Facility'),
               onTap: () {
+                print("Paid= ${paid}");
+                paid?
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => FacilityAppointmentPage(uid: uid?.toString() ?? '')),
+                )
+                    :ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('You are not allowed to make appointment. You are not member'),
+                  ),
                 );
               },
             ),
@@ -131,7 +154,7 @@ class UserMainPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => PaymentDetailsPage(uid: uid?.toString() ?? ''),
+                    builder: (context) => UserPaymentDetailsPage(uid: uid?.toString() ?? ''),
                   ),
                 );
               },
@@ -149,6 +172,7 @@ class UserMainPage extends StatelessWidget {
                 );
               },
             ),
+
             Container(
               decoration: BoxDecoration(
                 border: Border(
@@ -250,6 +274,7 @@ class UserMainPage extends StatelessWidget {
             context: context,
             builder: (BuildContext context){
               return AlertDialog(
+
                 title: Text('Emergency Button'),
                 content: SingleChildScrollView(
                   child: Column(
@@ -257,16 +282,21 @@ class UserMainPage extends StatelessWidget {
                     children: [
                       Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         IconButton(
-                          icon: Icon(Icons.local_fire_department, size: 70,),
+                          padding: EdgeInsets.all(0),
+                          iconSize:70 ,
+                          alignment: Alignment.center,
+                          icon: Icon(Icons.local_fire_department ,color:Colors.deepOrangeAccent,),
                           onPressed: () {
-                            ////////////////////////////////////////////////////////////////
                             Navigator.of(context).pop();
-                            _emergency(uid.toString(),'Fire');
+                            _emergency(uid.toString(),'Fire',);
                           },
                         ),
-                        SizedBox(width: 70,),
+                        SizedBox(width: 50,),
+
                         IconButton(
-                          icon: Icon(Icons.pool_rounded,size: 70,),
+                          padding: EdgeInsets.all(0),
+                          iconSize:70 ,
+                          icon: Icon(Icons.pool_rounded,color:Colors.blue),
                           onPressed: () {
                             ////////////////////////////////////////////////////////////////
                             Navigator.of(context).pop();
@@ -276,19 +306,28 @@ class UserMainPage extends StatelessWidget {
                         SizedBox(height: 16.0),
                       ]),
 
-                      SizedBox(height: 70,),
+                      SizedBox(height: 50,),
 
                       Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         IconButton(
-                          icon: Icon(Icons.local_fire_department,  size: 70,),
+                          padding: EdgeInsets.all(0),
+                          iconSize: 70,
+                          icon: Image.asset(
+                            'images/thief.png',
+                            width: 70,
+                            height: 70,
+                          ),
                           onPressed: () {
-                            ////////////////////////////////////////////////////////////////
                             Navigator.of(context).pop();
-                            _emergency(uid.toString(),'Thief');
+                            _emergency(uid.toString(), 'Other');
                           },
                         ),
-                        SizedBox(width: 70,),
+
+
+                        SizedBox(width: 50,),
                         IconButton(
+                          padding: EdgeInsets.all(0),
+                          iconSize:70 ,
                           icon: Icon(Icons.help_rounded,  size: 70,),
                           onPressed: () {
                             ////////////////////////////////////////////////////////////////
@@ -297,9 +336,7 @@ class UserMainPage extends StatelessWidget {
                           },
                         ),
                         SizedBox(height: 30.0),
-
                       ]),
-
                     ],
                   ),
                 ),
@@ -319,10 +356,7 @@ class UserMainPage extends StatelessWidget {
       'ID':ID,
       'emergencyType': type,
     });
-
   }
-
-
 }
 
 
@@ -373,6 +407,7 @@ class _CardWidgetState extends State<CardWidget> {
       notiList.add(doc['title']+": "+doc['details']);
     }
   }
+
   Future<void> changeNotiText(Timer t) async{
     _notiIndex++;
     if(notiList.length!=0){
@@ -590,15 +625,7 @@ class ImageButtonsRow2 extends StatelessWidget {
             );
           },
         ),
-        ImageButtonWithText(
-          image: AssetImage("images/card.png"),
-          text: "Card",
-          width: 80,
-          height: 80,
-          onPressed: () {
-            ///////////////////////////////////////////////////////////////////////////////no item
-          },
-        ),
+
         ImageButtonWithText(
           image: AssetImage("images/family.png"),
           text: "Family Detail",
@@ -614,8 +641,6 @@ class ImageButtonsRow2 extends StatelessWidget {
           },
         ),
         SizedBox(height: 16,)
-
-
       ],
     );
   }

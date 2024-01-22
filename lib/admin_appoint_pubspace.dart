@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class VisitorData extends StatelessWidget {
+class AdminAppointPubSpace extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.year}-${_twoDigits(date.month)}-${_twoDigits(date.day)}';
@@ -23,14 +23,14 @@ class VisitorData extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Visitor Data'),
+        title: Text('Register Public Space by Resident'),
 
 
       ),
       body: StreamBuilder(
 
-////////////////////////////////////////////////////
-        stream: FirebaseFirestore.instance.collection('datavisitors').snapshots(),
+
+        stream: FirebaseFirestore.instance.collection('pubspace').snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) {
             return Center(
@@ -48,14 +48,14 @@ class VisitorData extends StatelessWidget {
 
                 void _deleteData() async {
                   await FirebaseFirestore.instance
-                      .collection('datavisitors')
+                      .collection('pubspace')
                       .doc(document.id)
                       .delete();
                 }
 
                 void _editData() {
                   TextEditingController nameController = TextEditingController(text: data['name']);
-                  TextEditingController numpeopleController = TextEditingController(text: data['numpeople']);
+                  TextEditingController reasonController = TextEditingController(text: data['reason']);
                   DateTime selectedDate = DateTime.parse(data['checkindate']);
                   TimeOfDay selectedTime = TimeOfDay(
                     hour: int.parse(data['checkintime'].split(':')[0]),
@@ -69,9 +69,8 @@ class VisitorData extends StatelessWidget {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Check-in: ${_formatDate(DateTime.parse(data['realcheckindate']))} ${data['realcheckintime']}'),
-                        Text('Check-out: ${_formatDate(DateTime.parse(data['realcheckoutdate']))} ${data['realcheckouttime']}'),
-                        Text('Plate number: ${data['plate']}'),
+                        Text('Day: ${_formatDate(DateTime.parse(data['checkindate']))} '),
+                        Text('Reason: ${data['reason']}'),
                         Text('UID: ${data['uid']}'),
                       ],
                     ),

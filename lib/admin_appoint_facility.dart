@@ -23,7 +23,7 @@ class AdminAppointFacility extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Visitor Facility by Resident'),
+        title: Text('Register Facility by Resident'),
 
 
       ),
@@ -78,13 +78,7 @@ class AdminAppointFacility extends StatelessWidget {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            // Call the edit function when edit icon is pressed
-                            _editData();
-                          },
-                        ),
+
                         IconButton(
                           icon: Icon(Icons.delete),
                           onPressed: () {

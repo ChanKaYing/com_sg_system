@@ -117,7 +117,7 @@ class _FacilityAppointmentPageState extends State<FacilityAppointmentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pre-Register for Visitor'),
+        title: Text('Pre-Register for Facility'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

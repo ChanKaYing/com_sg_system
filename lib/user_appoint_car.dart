@@ -15,6 +15,7 @@ class _UserAppointmentPageState extends State<UserAppointmentPage> {
   _UserAppointmentPageState({required this.uid});
 
   TextEditingController _nameController = TextEditingController();
+  TextEditingController _plateController = TextEditingController();
   DateTime _checkInDate = DateTime.now();
   TimeOfDay _checkInTime = TimeOfDay.now();
 
@@ -90,6 +91,10 @@ class _UserAppointmentPageState extends State<UserAppointmentPage> {
       // Data added successfully
       print('Data added to Firestore!');
       print(uid);
+      _nameController.text="";
+      _plateController.text="";
+
+
     } catch (e) {
       // Handle errors
       print('Error adding data to Firestore: $e');
@@ -184,6 +189,7 @@ class _UserAppointmentPageState extends State<UserAppointmentPage> {
               SizedBox(height: 16.0),
 
               TextField(
+                controller: _plateController,
                 onChanged: (value) {
                   setState(() {
                     _licensePlate = value;

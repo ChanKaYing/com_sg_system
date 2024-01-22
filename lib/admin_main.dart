@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:com_sg_system/admin_appoint_car.dart';
 import 'package:com_sg_system/admin_appoint_facility.dart';
+import 'package:com_sg_system/admin_appoint_pubspace.dart';
 import 'package:com_sg_system/camera_in.dart';
 import 'package:com_sg_system/emergency_detail.dart';
 import 'package:com_sg_system/visitor_data.dart';
@@ -119,10 +120,10 @@ class AdminMainPage extends StatelessWidget {
             ListTile(
               title: Text('Pre-Register'),
               onTap: () {
-                //             Navigator.push(
-                //              context,
-                //              MaterialPageRoute(builder: (context) => UserAppointmentPage()),
-                //            );
+                             Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => AdminDisplayAppointments()),
+                            );
               },
             ),
             ListTile(
@@ -134,41 +135,36 @@ class AdminMainPage extends StatelessWidget {
                 );
               },
             ),
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             ListTile(
               title: Text('Public Space'),
               onTap: () {
-    //            Navigator.push(
-    //              context,
-    //              MaterialPageRoute(builder: (context) => PubSpaceAppointmentPage(adminName: adminName)),
-    //            );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AdminAppointPubSpace()),
+                );
               },
             ),
             ListTile(
               title: Text('Payment Detail'),
               onTap: () {
-                //      Navigator.push(
-                //        context,
-                //        MaterialPageRoute(builder: (context) => AdminPayment()),
-                //      );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AdminPaymentPage()),
+                      );
               },
             ),
 
-            ListTile(
-              title: Text('Family Detail'),
-              onTap: () {
-                //       Navigator.push(
-                //         context,
-                //         MaterialPageRoute(
-                //           builder: (context) => AdminFamilyPage(uid:adminName),
-                //        ),
-                //      );
-              },
-            ),
+
             ListTile(
               title: Text('Visitor Data'),
               onTap: () {
-                ////////////////////////////////////////////////////////////////////////////////////no item
-              },
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => VisitorData()),
+                );
+                },
             ),
             ListTile(
               title: Text('Users Account'),
@@ -186,45 +182,18 @@ class AdminMainPage extends StatelessWidget {
                 );
               },
             ),
-
-            Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: Colors.grey,
-                    width: 1.0,
-                  ),
-                ),
-              ),
-              child: ListTile(
-                title: Text(
-                  'Profile',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black, // Customize the color as needed
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => AdminProfilePage(adminName: adminName,)),
-                  );
-                },
-              ),
-            ),
-
           ],
         ),
       ),
 
 
       body: SingleChildScrollView(
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            CardWidget(),
-
+            CardWidget(adminName: adminName,),
+/*
             SizedBox(height: 8),
 
             Text(
@@ -260,6 +229,8 @@ class AdminMainPage extends StatelessWidget {
               ),
             ),
 
+ */
+
             SizedBox(height: 20),
 
             Text(
@@ -291,12 +262,27 @@ class AdminMainPage extends StatelessWidget {
 
 
 class CardWidget extends StatefulWidget {
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  final String adminName;
+
+  CardWidget({required this.adminName});
+
   @override
-  _CardWidgetState createState() => _CardWidgetState();
+  _CardWidgetState createState() => _CardWidgetState(adminName: adminName);
 }
 
 class _CardWidgetState extends State<CardWidget> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   int _currentIndex = 0;
+  String notiText="";
+  List<String> notiList=['Welcome Back'];//////////////////////////////////////////////////////////////////////////////bug
+  int _notiIndex = 0;
+
+  final String adminName;
+
+  _CardWidgetState({required this.adminName});
 
   List<String> _imagePaths = [
     "images/pool1.png",
@@ -309,14 +295,19 @@ class _CardWidgetState extends State<CardWidget> {
 
   late Timer _timer;
   late Timer _timer2;
+  late Timer _timer3;
+  late Timer _timer4;
+  late Timer _timer5;
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
     super.initState();
     _timer = Timer.periodic(Duration(seconds: 3), _swapImage);
-    _timer2= Timer.periodic(Duration(seconds: 3), _emergency);
+    _timer2 = Timer.periodic(Duration(seconds: 5), getNotiList);
+    _timer3 = Timer.periodic(Duration(seconds: 2), changeNotiText);
+    _timer4 = Timer.periodic(Duration(seconds: 60), refreshCarRegister);
+    _timer5= Timer.periodic(Duration(seconds: 2), _emergency);
   }
 
   void _swapImage(Timer timer) {
@@ -324,7 +315,6 @@ class _CardWidgetState extends State<CardWidget> {
       _currentIndex = (_currentIndex + 1) % _imagePaths.length;
     });
   }
-
 
   Future<void> _emergency(Timer t) async {
     QuerySnapshot querySnapshot = await _firestore.collection('emergency').get();
@@ -347,14 +337,49 @@ class _CardWidgetState extends State<CardWidget> {
 
   }
 
+  Future<void> getNotiList(Timer t) async {
+    QuerySnapshot querySnapshot = await _firestore.collection("notifications").get();
+    for(var doc in querySnapshot.docs){
+      notiList.add(doc['title']+": "+doc['details']);
+    }
+  }
 
+  Future<void> changeNotiText(Timer t) async{
+    _notiIndex++;
+    if(notiList.length!=0){
+      print("KEKE");
+      print(notiList.length);
+      notiText = notiList[_notiIndex % notiList.length];
+    }
+    else{
+      notiText = "Welcome Back";
+    }
+    print("PPIPI");
+    print(_notiIndex);
+  }
 
-
+  Future<void> refreshCarRegister(Timer t) async{
+    QuerySnapshot querySnapshot = await _firestore.collection('carregister').get();
+    for(var doc in querySnapshot.docs){
+      var estimateCheckin = doc['checkindate']+" "+doc['checkintime'];
+      print(estimateCheckin);
+      if(DateTime.now().isAfter(DateTime.parse(estimateCheckin).add(Duration(minutes: 30)))){
+        print("DELETE CARREG OF ${doc.id}");
+        await FirebaseFirestore.instance
+            .collection('carregister')
+            .doc(doc.id)
+            .delete();
+      }
+    }
+  }
 
   @override
   void dispose() {
     _timer.cancel();
     _timer2.cancel();
+    _timer3.cancel();
+    _timer4.cancel();
+    _timer5.cancel();
     super.dispose();
   }
 
@@ -364,7 +389,7 @@ class _CardWidgetState extends State<CardWidget> {
         margin: EdgeInsets.all(8),
         child:Container(
           width: 300, // Set the fixed width for the card
-          height: 270, // Set the fixed height for the card
+          height: 500, // Set the fixed height for the card
 
           child:Padding(
             padding: EdgeInsets.all(16),
@@ -387,16 +412,52 @@ class _CardWidgetState extends State<CardWidget> {
                         height: _fixedImageWidth * (3 / 4), // Calculate height based on original aspect ratio
 
                       ),
+                      SizedBox(height: 10),
+                      Expanded(child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                            height: 200,
+                            color: Colors.grey[200], // Notification bar background color
+                            child: Column(
+                              children: [
+                                Text("Notification",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                                ),
+                                Text(notiText,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 15),
+                                ),
+                                SizedBox(height: 10),
+                                Spacer(),// Adding some spacing between the two Text widgets
+                                TextButton(
+                                  onPressed: () {
+                                    // Navigate to another page here
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => AdminNotificationPage(adminName: adminName)),
+                                    );
+                                  },
+                                  child: Text('Click for more'),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      )),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-        )
+        ),
     );
   }
 }
+
 
 class ImageButtonsRow1 extends StatelessWidget {
 
@@ -438,10 +499,10 @@ class ImageButtonsRow1 extends StatelessWidget {
           width: 90,
           height: 90,
           onPressed: () {
-    //        Navigator.push(
-    //          context,
-    //          MaterialPageRoute(builder: (context) => PubSpaceAppointmentPage(adminName: adminName)),
-    //        );
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AdminAppointPubSpace()),
+            );
           },
         ),
       ],
@@ -473,19 +534,18 @@ class ImageButtonsRow2 extends StatelessWidget {
         ),
 
         ImageButtonWithText(
-          image: AssetImage("images/family.png"),
-          text: "Family Detail",
+          image: AssetImage("images/visitor.png"),
+          text: "Visitor",
           width: 80,
           height: 80,
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => AdminFamilyPage(),
-              ),
+              MaterialPageRoute(builder: (context) => VisitorData()),
             );
           },
         ),
+
       ],
     );
   }
@@ -534,21 +594,10 @@ class ImageButtonsRow3 extends StatelessWidget {
             );
           },
         ),
-        ImageButtonWithText(
-          image: AssetImage("images/visitor.png"),
-          text: "Visitor",
-          width: 80,
-          height: 80,
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => VisitorData()),
-            );
-            },
-        ),
+
 
         ImageButtonWithText(
-          image: AssetImage("images/visitor.png"),
+          image: AssetImage("images/camera.jpg"),
           text: "Camera",
           width: 80,
           height: 80,

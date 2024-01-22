@@ -32,6 +32,8 @@ class UserPaymentPage extends StatelessWidget {
 }
 
 class UserPaymentList extends StatelessWidget {
+
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
