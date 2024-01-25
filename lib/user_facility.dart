@@ -13,10 +13,12 @@ class FacilityAppointmentPage extends StatefulWidget {
 class _FacilityAppointmentPageState extends State<FacilityAppointmentPage> {
   final String uid;
   _FacilityAppointmentPageState({required this.uid});
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   TextEditingController _nameController = TextEditingController();
   DateTime _checkInDate = DateTime.now();
   TimeOfDay _checkInTime = TimeOfDay.now();
+  TimeOfDay _checkOutTime = TimeOfDay.now();
 
   String _numPeople = '';
   String _typeFacility = '';
@@ -45,56 +47,112 @@ class _FacilityAppointmentPageState extends State<FacilityAppointmentPage> {
     if (picked != null) {
       setState(() {
         _checkInTime = picked;
+        _checkOutTime = TimeOfDay(hour:picked.hour+1,minute:picked.minute);
       });
     }
   }
 
-  Future<void> _submitData() async {
+  bool timeOverlap(DateTime OtherCI,DateTime OtherCO,DateTime BookingCI,DateTime BookingCO){
+    bool A=BookingCI.isAfter(OtherCI)&&BookingCI.isBefore(OtherCO);
+    bool B=BookingCO.isAfter(OtherCI)&&BookingCO.isBefore(OtherCO);
+    bool C=BookingCI.isBefore(OtherCI)&&BookingCO.isAfter(OtherCO);
+    bool D=BookingCI==OtherCI&&BookingCO==OtherCO;
 
-    if (_nameController.text.isEmpty || _numPeople.isEmpty || _typeFacility.isEmpty) {
-      // Notify the user if any required fields are empty
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Empty Fields'),
-            content: Text('Please fill in all the required fields.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-      return; // Stop execution if any field is empty
+    if(A||B||C||D){
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+
+  Future<void> _submitData() async {
+    QuerySnapshot querySnapshot = await _firestore.collection('facility').get();
+    bool noBooking = false;
+    int totalGymPPL = 0;
+
+    if (_typeFacility == 'Please choose a type of facility'){
+      noBooking=true;
     }
 
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    Map<String, dynamic> userData = {
-      'name': _nameController.text,
-      'checkindate': _formatDate(_checkInDate),
-      'checkintime': _formatTime(_checkInTime),
-      'numpeople': _numPeople,
-      'typefacility' : _typeFacility,
-      'uid':uid,
+    for(var doc in querySnapshot.docs){
+      var OtherCheckIn = doc['checkindate']+" "+doc['checkintime'];
+      var OtherCheckOut = doc['checkindate']+" "+doc['checkouttime'];
+      var OtherFacility = doc['typefacility'];
+      var OtherNum = int.parse(doc['numpeople']);
+      OtherCheckIn=DateTime.parse(OtherCheckIn);
+      OtherCheckOut=DateTime.parse(OtherCheckOut);
+      var BookingInTime = DateTime(_checkInDate.year,_checkInDate.month,_checkInDate.day,_checkInTime.hour,
+      _checkInTime.minute);
+      var BookingOutTime = DateTime(_checkInDate.year,_checkInDate.month,_checkInDate.day,_checkOutTime.hour,
+          _checkOutTime.minute);
+      print(OtherCheckIn);
+      print(BookingInTime);
+      if(OtherFacility=="Gym Room" && timeOverlap(OtherCheckIn,OtherCheckOut,BookingInTime,BookingOutTime)){
+        totalGymPPL=totalGymPPL+OtherNum;
+      }
+      if(OtherFacility==_typeFacility && timeOverlap(OtherCheckIn,OtherCheckOut,BookingInTime,BookingOutTime)){
 
-    };
+        print("BOOKED,Choose another time");
+        noBooking=true;
+        break;
+      }
+    }
+    print(totalGymPPL);
 
-    try {
-      await firestore
-          .collection('facility')
-          .add(userData);
+    if(_typeFacility=="Gym Room"&& totalGymPPL>=5){
+      print("FULL,Choose another time");
+      noBooking=true;
+    }
 
-      // Data added successfully
-      print('Data added to Firestore!');
-      print(uid);
-    } catch (e) {
-      // Handle errors
-      print('Error adding data to Firestore: $e');
+    if(!noBooking) {
+      if (_nameController.text.isEmpty || _numPeople.isEmpty ||
+          _typeFacility.isEmpty) {
+        // Notify the user if any required fields are empty
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Empty Fields'),
+              content: Text('Please fill in all the required fields.'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+        return; // Stop execution if any field is empty
+      }
+
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      Map<String, dynamic> userData = {
+        'name': _nameController.text,
+        'checkindate': _formatDate(_checkInDate),
+        'checkintime': _formatTime(_checkInTime),
+        'checkouttime': _formatTime(_checkOutTime),
+        'numpeople': _numPeople,
+        'typefacility': _typeFacility,
+        'uid': uid,
+
+      };
+
+      try {
+        await firestore
+            .collection('facility')
+            .add(userData);
+
+        // Data added successfully
+        print('Data added to Firestore!');
+        print(uid);
+      } catch (e) {
+        // Handle errors
+        print('Error adding data to Firestore: $e');
+      }
     }
   }
 
@@ -112,6 +170,16 @@ class _FacilityAppointmentPageState extends State<FacilityAppointmentPage> {
     }
     return '0$n';
   }
+
+  // Initial Selected Value
+  String dropdownvalue = 'Please choose a type of facility';
+
+  // List of items in our dropdown menu
+  var items = [
+    'Please choose a type of facility',
+    '- Gym Room',
+    '- Swimming Pool',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +232,7 @@ class _FacilityAppointmentPageState extends State<FacilityAppointmentPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Check-in Time:',
+                          'Booking Time:',
                           style: TextStyle(fontSize: 16),
                         ),
                         SizedBox(height: 10.0),
@@ -183,18 +251,45 @@ class _FacilityAppointmentPageState extends State<FacilityAppointmentPage> {
                   ],
                 ),
               ]),
+
+
               SizedBox(height: 16.0),
 
-              TextField(
-                onChanged: (value) {
+              Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Type of Facility:',
+                      style: TextStyle(fontSize: 16),
+                    ),
+
+
+              DropdownButton(
+                // Initial Value
+                value: dropdownvalue,
+
+                // Down Arrow Icon
+                icon: const Icon(Icons.keyboard_arrow_down),
+                // Hint text shown when no item is selected
+                hint: Text('Please choose a type of facility', ),
+                // Array list of items
+                items: items.map((String items) {
+                  return DropdownMenuItem(
+                    value: items,
+                    child: Text(items),
+                  );
+                }).toList(),
+                // After selecting the desired option,it will
+                // change button value to selected value
+                onChanged: (String? newValue) {
                   setState(() {
-                    _typeFacility = value;
+                    dropdownvalue = newValue!;
+                    _typeFacility=newValue;
                   });
                 },
-                decoration: InputDecoration(
-                  labelText: 'Type of Facility',
-                ),
               ),
+            ] ),
+
 
               TextField(
                 onChanged: (value) {
@@ -305,11 +400,12 @@ class DisplayAppointments extends StatelessWidget {
 
                             SizedBox(height: 16.0),
 
-                            TextField(
-                              controller: peopleController,
-                              decoration: InputDecoration(
-                                  labelText: 'Number of people'),
-                            ),
+ //                           DropdownButton(
+ //                             controller: peopleController,
+ //                             decoration: InputDecoration(
+  //                                labelText: 'Number of people'),
+ //                           ),
+
                             SizedBox(height: 16.0),
 
                             TextField(
