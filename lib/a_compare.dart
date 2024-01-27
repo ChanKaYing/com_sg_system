@@ -115,7 +115,7 @@ class _FacilityAppointmentPageState extends State<FacilityAppointmentPage> {
       OtherCheckIn=DateTime.parse(OtherCheckIn);
       OtherCheckOut=DateTime.parse(OtherCheckOut);
       var BookingInTime = DateTime(_checkInDate.year,_checkInDate.month,_checkInDate.day,_checkInTime.hour,
-      _checkInTime.minute);
+          _checkInTime.minute);
       var BookingOutTime = DateTime(_checkInDate.year,_checkInDate.month,_checkInDate.day,_checkOutTime.hour,
           _checkOutTime.minute);
       print(OtherCheckIn);
@@ -152,6 +152,7 @@ class _FacilityAppointmentPageState extends State<FacilityAppointmentPage> {
         break;
       }
     }
+
     print(totalGymPPL);
 
     if(_typeFacility=="- Gym Room"&& totalGymPPL>=10){
@@ -233,7 +234,6 @@ class _FacilityAppointmentPageState extends State<FacilityAppointmentPage> {
         'numpeople': _numPeople,
         'typefacility': _typeFacility,
         'uid': uid,
-
       };
 
       try {
@@ -554,9 +554,9 @@ class DisplayAppointments extends StatelessWidget {
       stream: FirebaseFirestore.instance
           .collection('facility')
           .where('typefacility', isEqualTo: '- Gym Room')
- //         .orderBy('checkintime', descending: false)
- //         .startAfter()
- //         .limit(10)
+      //         .orderBy('checkintime', descending: false)
+      //         .startAfter()
+      //         .limit(10)
           .snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) {
@@ -601,7 +601,7 @@ class DisplayAppointments extends StatelessWidget {
                             TextField(
                               controller: nameController,
                               decoration:
-                                  InputDecoration(labelText: 'Register Resident Name'),
+                              InputDecoration(labelText: 'Register Resident Name'),
                             ),
 
 
@@ -622,7 +622,7 @@ class DisplayAppointments extends StatelessWidget {
                                 Row(children: [
                                   Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         Text('Selected Date: '),
                                         Text('${_formatDate(selectedDate)}'),
@@ -635,7 +635,7 @@ class DisplayAppointments extends StatelessWidget {
                                   TextButton(
                                     onPressed: () async {
                                       final DateTime? picked =
-                                          await showDatePicker(
+                                      await showDatePicker(
                                         context: context,
                                         initialDate: selectedDate,
                                         firstDate: DateTime.now(),
@@ -657,7 +657,7 @@ class DisplayAppointments extends StatelessWidget {
                               children: [
                                 Column(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    CrossAxisAlignment.start,
                                     children: [
                                       Text('Selected Time: '),
                                       Text('${selectedTime.format(context)}'),
@@ -668,7 +668,7 @@ class DisplayAppointments extends StatelessWidget {
                                 TextButton(
                                   onPressed: () async {
                                     final TimeOfDay? picked =
-                                        await showTimePicker(
+                                    await showTimePicker(
                                       context: context,
                                       initialTime: selectedTime,
                                     );

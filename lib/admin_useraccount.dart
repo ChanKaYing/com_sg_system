@@ -37,12 +37,22 @@ class UsersAccountPage extends StatelessWidget {
   }
 }
 
-class UsersAccountTable extends StatelessWidget {
+class UsersAccountTable extends StatefulWidget {
+  @override
+  _UsersAccountTableState createState() => _UsersAccountTableState();
+}
+
+class _UsersAccountTableState extends State<UsersAccountTable> {
+
   final TextEditingController nameController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController(); // Added phone controller
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController memberController = TextEditingController();
+  bool _isMember = false;
+
+
 
   void _saveUserData(BuildContext context, DocumentSnapshot user) {
     FirebaseFirestore.instance.collection('users').doc(user.id).update({
@@ -50,13 +60,16 @@ class UsersAccountTable extends StatelessWidget {
       'address': addressController.text,
       'email': emailController.text,
       'password': passwordController.text,
-      'phone': phoneController.text, // Add phone number to Firestore document
+      'phone': phoneController.text,
+      'member': memberController.text,
+
     }).then((_) {
       Navigator.pop(context);
     }).catchError((error) {
       print('Error: $error');
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -93,8 +106,10 @@ class UsersAccountTable extends StatelessWidget {
                 DataColumn(label: Text('Address')),
                 DataColumn(label: Text('Email')),
                 DataColumn(label: Text('Password')),
-                DataColumn(label: Text('Phone')), // Added phone column
+                DataColumn(label: Text('Phone')),
+                DataColumn(label: Text('Member')),
               ],
+
               rows: users!.map<DataRow>((user) {
                 return DataRow(
                   cells: [
@@ -104,13 +119,18 @@ class UsersAccountTable extends StatelessWidget {
                         addressController.text = user['address'];
                         emailController.text = user['email'];
                         passwordController.text = user['password'];
-                        phoneController.text = user['phone']; // Set phone controller
+                        phoneController.text = user['phone'];
+                        memberController.text = user['member'];
 
                         showDialog(
                           context: context,
-                          builder: (context) => AlertDialog(
+                          builder: (BuildContext context) => AlertDialog(
                             title: Text('Edit User'),
-                            content: Column(
+                            content:
+
+                            StatefulBuilder(builder:(BuildContext context,void Function(void Function()) setState) {
+
+                            return Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 TextField(
@@ -133,8 +153,25 @@ class UsersAccountTable extends StatelessWidget {
                                   controller: phoneController,
                                   keyboardType: TextInputType.phone,
                                   decoration: InputDecoration(labelText: 'Phone'),
-                                ), // Added phone field
-                              ],
+                                ),
+                                SizedBox(height: 10.0,),
+                                Row(
+                                      children: [
+                                        Text('Member'),
+                                        Checkbox(
+                                          value: memberController.text == '1',
+                                          onChanged: (value) {
+                                            setState(() {
+                                              memberController.text = value! ? '1' : '0';
+                                              print(_isMember);
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                             actions: [
                               TextButton(
@@ -149,13 +186,16 @@ class UsersAccountTable extends StatelessWidget {
                       },
                       child: Text(user['uid'].toString()),
                     )),
+
+
                     DataCell(InkWell(
                       onTap: () {
                         nameController.text = user['name'];
                         addressController.text = user['address'];
                         emailController.text = user['email'];
                         passwordController.text = user['password'];
-                        phoneController.text = user['phone']; // Set phone controller
+                        phoneController.text = user['phone'];
+                        memberController.text = user['member'];
 
                         showDialog(
                           context: context,
@@ -184,7 +224,16 @@ class UsersAccountTable extends StatelessWidget {
                                   controller: phoneController,
                                   keyboardType: TextInputType.phone,
                                   decoration: InputDecoration(labelText: 'Phone'),
-                                ), // Added phone field
+                                ),
+                                Row(
+                                  children: [
+                                    Text(user['member']),
+                                    Checkbox(
+                                      value: user['member'] == '1',
+                                      onChanged: null,
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                             actions: [
@@ -200,13 +249,17 @@ class UsersAccountTable extends StatelessWidget {
                       },
                       child: Text(user['name']),
                     )),
+
+
                     DataCell(InkWell(
                       onTap: () {
                         nameController.text = user['name'];
                         addressController.text = user['address'];
                         emailController.text = user['email'];
                         passwordController.text = user['password'];
-                        phoneController.text = user['phone']; // Set phone controller
+                        phoneController.text = user['phone'];
+                        memberController.text = user['member'];
+
 
                         showDialog(
                           context: context,
@@ -235,7 +288,19 @@ class UsersAccountTable extends StatelessWidget {
                                   controller: phoneController,
                                   keyboardType: TextInputType.phone,
                                   decoration: InputDecoration(labelText: 'Phone'),
-                                ), // Added phone field
+                                ),
+                                Row(
+                                  children: [
+                                    Text('Member'),
+                                    Checkbox(
+                                      value: memberController.text == '1',
+                                      onChanged: (value) {
+                                        Navigator.of(context).pop();
+                                        _saveUserData(context, user);
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                             actions: [
@@ -251,13 +316,16 @@ class UsersAccountTable extends StatelessWidget {
                       },
                       child: Text(user['address']),
                     )),
+
+
                     DataCell(InkWell(
                       onTap: () {
                         nameController.text = user['name'];
                         addressController.text = user['address'];
                         emailController.text = user['email'];
                         passwordController.text = user['password'];
-                        phoneController.text = user['phone']; // Set phone controller
+                        phoneController.text = user['phone'];
+                        memberController.text = user['member'];
 
                         showDialog(
                           context: context,
@@ -286,7 +354,20 @@ class UsersAccountTable extends StatelessWidget {
                                   controller: phoneController,
                                   keyboardType: TextInputType.phone,
                                   decoration: InputDecoration(labelText: 'Phone'),
-                                ), // Added phone field
+                                ),
+                                SizedBox(height: 10.0,),
+                                Row(
+                                  children: [
+                                    Text('Member'),
+                                    Checkbox(
+                                      value: memberController.text == '1',
+                                      onChanged: (value) {
+                                        Navigator.of(context).pop();
+                                        _saveUserData(context, user);
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                             actions: [
@@ -302,13 +383,16 @@ class UsersAccountTable extends StatelessWidget {
                       },
                       child: Text(user['email']),
                     )),
+
+
                     DataCell(InkWell(
                       onTap: () {
                         nameController.text = user['name'];
                         addressController.text = user['address'];
                         emailController.text = user['email'];
                         passwordController.text = user['password'];
-                        phoneController.text = user['phone']; // Set phone controller
+                        phoneController.text = user['phone'];
+                        memberController.text = user['member'];
 
                         showDialog(
                           context: context,
@@ -337,7 +421,19 @@ class UsersAccountTable extends StatelessWidget {
                                   controller: phoneController,
                                   keyboardType: TextInputType.phone,
                                   decoration: InputDecoration(labelText: 'Phone'),
-                                ), // Added phone field
+                                ),
+                                Row(
+                                  children: [
+                                    Text('Member'),
+                                    Checkbox(
+                                      value: memberController.text == '1',
+                                      onChanged: (value) {
+                                        Navigator.of(context).pop();
+                                        _saveUserData(context, user);
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                             actions: [
@@ -353,13 +449,16 @@ class UsersAccountTable extends StatelessWidget {
                       },
                       child: Text(user['password']),
                     )),
+
+
                     DataCell(InkWell(
                       onTap: () {
                         nameController.text = user['name'];
                         addressController.text = user['address'];
                         emailController.text = user['email'];
                         passwordController.text = user['password'];
-                        phoneController.text = user['phone']; // Set phone controller
+                        phoneController.text = user['phone'];
+                        memberController.text = user['member'];
 
                         showDialog(
                           context: context,
@@ -388,7 +487,19 @@ class UsersAccountTable extends StatelessWidget {
                                   controller: phoneController,
                                   keyboardType: TextInputType.phone,
                                   decoration: InputDecoration(labelText: 'Phone'),
-                                ), // Added phone field
+                                ),
+                                Row(
+                                  children: [
+                                    Text('Member'),
+                                    Checkbox(
+                                      value: memberController.text == '1',
+                                      onChanged: (value) {
+                                        Navigator.of(context).pop();
+                                        _saveUserData(context, user);
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                             actions: [
@@ -403,7 +514,76 @@ class UsersAccountTable extends StatelessWidget {
                         );
                       },
                       child: Text(user['phone']),
-                    )), // Added phone column
+                    )),
+
+
+                    DataCell(InkWell(
+                      onTap: () {
+                        nameController.text = user['name'];
+                        addressController.text = user['address'];
+                        emailController.text = user['email'];
+                        passwordController.text = user['password'];
+                        phoneController.text = user['phone'];
+                        memberController.text = user['member'];
+
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('Edit User'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextField(
+                                  controller: nameController,
+                                  decoration: InputDecoration(labelText: 'Name'),
+                                ),
+                                TextField(
+                                  controller: addressController,
+                                  decoration: InputDecoration(labelText: 'Address'),
+                                ),
+                                TextField(
+                                  controller: emailController,
+                                  decoration: InputDecoration(labelText: 'Email'),
+                                ),
+                                TextField(
+                                  controller: passwordController,
+                                  decoration: InputDecoration(labelText: 'Password'),
+                                ),
+                                TextField(
+                                  controller: phoneController,
+                                  keyboardType: TextInputType.phone,
+                                  decoration: InputDecoration(labelText: 'Phone'),
+                                ),
+                                SizedBox(height: 16.0),
+                                Row(
+                                  children: [
+                                    Text('Member'),
+                                    Checkbox(
+                                      value: _isMember,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          print(value);
+                                          _isMember = value!;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  _saveUserData(context, user);
+                                },
+                                child: Text('Save'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      child: Text(user['member'] == '1'? "YES":"NO"),
+                    )),
                   ],
                 );
               }).toList(),
@@ -426,7 +606,9 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _addressController = TextEditingController();
-  TextEditingController _phoneController = TextEditingController(); // Added phone controller
+  TextEditingController _phoneController = TextEditingController();
+//  TextEditingController _memberController = TextEditingController();
+  bool _isMember = false;
 
   bool _isPasswordVisible = false;
 
@@ -436,14 +618,19 @@ class _RegisterPageState extends State<RegisterPage> {
     String email = _emailController.text;
     String password = _passwordController.text;
     String address = _addressController.text;
-    String phone = _phoneController.text; // Get phone number from controller
+    String phone = _phoneController.text;
+//    String member = _memberController.text;
+    String member = _isMember ? '1' : '0';
 
     if (uid == null ||
         name.isEmpty ||
-        email.isEmpty ||
+//        email.isEmpty ||
         password.isEmpty ||
         address.isEmpty ||
-        phone.isEmpty) {
+        member.isEmpty
+//    ||
+//        phone.isEmpty
+        ) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -472,7 +659,8 @@ class _RegisterPageState extends State<RegisterPage> {
           'email': email,
           'password': password,
           'address': address,
-          'phone': phone, // Add phone number to Firestore document
+          'phone': phone,
+          'member' : member,
         });
 
         showDialog(
@@ -622,7 +810,21 @@ class _RegisterPageState extends State<RegisterPage> {
                   labelText: 'Phone',
                   prefixIcon: Icon(Icons.phone),
                 ),
-              ), // Added phone field
+              ),
+              SizedBox(height: 16.0),
+              Row(
+                children: [
+                  Text('Member'),
+                  Checkbox(
+                    value: _isMember,
+                    onChanged: (value) {
+                      setState(() {
+                        _isMember = value!;
+                      });
+                    },
+                  ),
+                ],
+              ),
               SizedBox(height: 32.0),
               ElevatedButton(
                 onPressed: _registerUser,
