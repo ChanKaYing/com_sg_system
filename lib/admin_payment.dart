@@ -115,7 +115,7 @@ class PaymentDetailsPage extends StatelessWidget {
               ),
 
               TextField(
-                decoration: InputDecoration(labelText: 'Method'),
+                decoration: InputDecoration(labelText: 'Payment Method'),
                 onChanged: (value) => method = value,
               ),
 
@@ -178,7 +178,7 @@ class PaymentDetailsPage extends StatelessWidget {
                 TextEditingController(text: initialAmount.toString()),
               ),
               TextField(
-                decoration: InputDecoration(labelText: 'Method'),
+                decoration: InputDecoration(labelText: 'Payment Method'),
                 onChanged: (value) => method = value,
                 controller: TextEditingController(text: initialMethod),
               ),
@@ -265,7 +265,7 @@ class PaymentDetailsPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('Amount: RM ${payment['amount']}'),
-                            Text('Method: ${payment['method']}'),
+                            Text('Payment Method: ${payment['method']}'),
                             Text('Time: ${payment['timestamp']}'),
                             SizedBox(height: 8,),
                           ],

@@ -15,7 +15,6 @@ class _UserAppointmentPageState extends State<UserAppointmentPage> {
   _UserAppointmentPageState({required this.uid});
 
   TextEditingController _nameController = TextEditingController();
-  TextEditingController _plateController = TextEditingController();
   DateTime _checkInDate = DateTime.now();
   TimeOfDay _checkInTime = TimeOfDay.now();
 
@@ -91,10 +90,6 @@ class _UserAppointmentPageState extends State<UserAppointmentPage> {
       // Data added successfully
       print('Data added to Firestore!');
       print(uid);
-      _nameController.text="";
-      _plateController.text="";
-
-
     } catch (e) {
       // Handle errors
       print('Error adding data to Firestore: $e');
@@ -189,7 +184,6 @@ class _UserAppointmentPageState extends State<UserAppointmentPage> {
               SizedBox(height: 16.0),
 
               TextField(
-                controller: _plateController,
                 onChanged: (value) {
                   setState(() {
                     _licensePlate = value;
@@ -305,11 +299,11 @@ class DisplayAppointments extends StatelessWidget {
                             Row(
                               children: [
                                 Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                Text('Selected Date: '),
-                                Text('${_formatDate(selectedDate)}'),
-                      ]),
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Selected Date: '),
+                                      Text('${_formatDate(selectedDate)}'),
+                                    ]),
 
                                 SizedBox(width: 10.0),
                                 Spacer(),
@@ -334,12 +328,12 @@ class DisplayAppointments extends StatelessWidget {
                             Row(
                               children: [
                                 Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
 
-                                Text('Selected Time: '),
-                                Text('${selectedTime.format(context)}'),
-                                ]),
+                                      Text('Selected Time: '),
+                                      Text('${selectedTime.format(context)}'),
+                                    ]),
                                 SizedBox(width: 10.0),
                                 Spacer(),
                                 TextButton(

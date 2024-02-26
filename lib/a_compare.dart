@@ -1,971 +1,199 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class FacilityAppointmentPage extends StatefulWidget {
+
+
+class UserProfilePage extends StatefulWidget {
   final String uid;
-  FacilityAppointmentPage({required this.uid});
+
+  UserProfilePage({required this.uid});
 
   @override
-  _FacilityAppointmentPageState createState() => _FacilityAppointmentPageState(uid: uid);
+  _UserProfilePageState createState() => _UserProfilePageState();
 }
 
-class _FacilityAppointmentPageState extends State<FacilityAppointmentPage> {
-  final String uid;
-  _FacilityAppointmentPageState({required this.uid});
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+class _UserProfilePageState extends State<UserProfilePage> {
+  late TextEditingController _nameController;
+  late TextEditingController _addressController;
+  late TextEditingController _emailController;
+  late TextEditingController _phoneController;
+  late TextEditingController _plateController;
+  late TextEditingController _plate2Controller; // New controller for plate2
 
-  TextEditingController _nameController = TextEditingController();
-  DateTime _checkInDate = DateTime.now();
-  TimeOfDay _checkInTime = TimeOfDay(hour:TimeOfDay.now().hour, minute: 0,);
-  TimeOfDay _checkOutTime = TimeOfDay(hour:TimeOfDay.now().hour+1, minute: 0,);
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _addressController = TextEditingController();
+    _emailController = TextEditingController();
+    _phoneController = TextEditingController();
+    _plateController = TextEditingController();
+    _plate2Controller = TextEditingController(); // Initialize the new controller
 
-  String _numPeople = '';
-  String _typeFacility = '';
+    fetchUserData();
+  }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _checkInDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101),
-    );
+  Future<void> fetchUserData() async {
+    DocumentSnapshot<Map<String, dynamic>> snapshot =
+    await FirebaseFirestore.instance.collection('users').doc(widget.uid).get();
 
-    if (picked != null) {
+    if (snapshot.exists) {
       setState(() {
-        _checkInDate = picked;
+        _nameController.text = snapshot.data()!['name'] ?? 'Your Name';
+        _addressController.text = snapshot.data()!['address'] ?? 'Your Address';
+        _emailController.text = snapshot.data()!['email'] ?? 'youremail@example.com';
+        _phoneController.text = snapshot.data()!['phone'] ?? '+1234567890';
+      });
+    }
+
+    DocumentSnapshot<Map<String, dynamic>> plateSnapshot =
+    await FirebaseFirestore.instance.collection('licenseplate').doc(widget.uid).get();
+
+    if (plateSnapshot.exists) {
+      setState(() {
+        _plateController.text = plateSnapshot.data()!['plate'] ?? '';
+        _plate2Controller.text = plateSnapshot.data()!['plate2'] ?? ''; // Update for plate2
       });
     }
   }
 
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
+  void _showEditDialog() {
+    showDialog(
       context: context,
-//      initialTime: _checkInTime,
-      initialTime: TimeOfDay(hour: _checkInTime.hour, minute: 0), // Set initial time with minutes as zero
-    );
-
-
-    if (picked != null) {
-      setState(() {
-
-        if(picked.hour < _checkOutTime.hour){
-          _checkInTime = TimeOfDay(hour: picked.hour, minute: 0);
-        }else{
-          _checkInTime = TimeOfDay(hour:_checkOutTime.hour-1, minute:0);
-        }
-//        _checkInTime = picked;
-
-
-      });
-    }
-  }
-
-  Future<void> _selectTimeOut(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-//      initialTime: _checkInTime,
-      initialTime: TimeOfDay(hour: _checkInTime.hour+1, minute: 0), // Set initial time with minutes as zero
-    );
-
-
-    if (picked != null) {
-      setState(() {
-        if(picked.hour > _checkInTime.hour){
-          _checkOutTime = TimeOfDay(hour:picked.hour,minute:0);
-        }else{
-          _checkOutTime = TimeOfDay(hour:_checkInTime.hour+1,minute:0);
-          AlertDialog();////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        }
-//        _checkInTime = picked;
-
-      });
-    }
-  }
-
-  bool timeOverlap(DateTime OtherCI,DateTime OtherCO,DateTime BookingCI,DateTime BookingCO){
-    bool A=BookingCI.isAfter(OtherCI)&&BookingCI.isBefore(OtherCO);
-    bool B=BookingCO.isAfter(OtherCI)&&BookingCO.isBefore(OtherCO);
-    bool C=BookingCI.isBefore(OtherCI)&&BookingCO.isAfter(OtherCO);
-    bool D=BookingCI==OtherCI&&BookingCO==OtherCO;
-
-    if(A||B||C||D){
-      return true;
-    }
-    else{
-      return false;
-    }
-  }
-
-  Future<void> _submitData() async {
-    QuerySnapshot querySnapshot = await _firestore.collection('facility').get();
-    bool noBooking = false;
-    int totalGymPPL = 0;
-    int totalPoolPPL = 0;
-
-    if (_typeFacility == 'Please choose a type of facility'){
-      noBooking=true;
-    }
-
-    for(var doc in querySnapshot.docs){
-      var OtherCheckIn = doc['checkindate']+" "+doc['checkintime'];
-      var OtherCheckOut = doc['checkindate']+" "+doc['checkouttime'];
-      var OtherFacility = doc['typefacility'];
-      var OtherNum = int.parse(doc['numpeople']);
-      OtherCheckIn=DateTime.parse(OtherCheckIn);
-      OtherCheckOut=DateTime.parse(OtherCheckOut);
-      var BookingInTime = DateTime(_checkInDate.year,_checkInDate.month,_checkInDate.day,_checkInTime.hour,
-          _checkInTime.minute);
-      var BookingOutTime = DateTime(_checkInDate.year,_checkInDate.month,_checkInDate.day,_checkOutTime.hour,
-          _checkOutTime.minute);
-      print(OtherCheckIn);
-      print(BookingInTime);
-      if(OtherFacility=="- Gym Room" && timeOverlap(OtherCheckIn,OtherCheckOut,BookingInTime,BookingOutTime)){
-        totalGymPPL=totalGymPPL+OtherNum;
-      }
-      if(OtherFacility=="- Swimming Pool" && timeOverlap(OtherCheckIn,OtherCheckOut,BookingInTime,BookingOutTime)){
-        totalPoolPPL=totalPoolPPL+OtherNum;
-      }
-      if(OtherFacility=="- Badminton" && timeOverlap(OtherCheckIn,OtherCheckOut,BookingInTime,BookingOutTime)){
-
-        print("BOOKED,Choose another time");
-
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Error'),
-              content: Text('This time is BOOKED, please choose another time. Thank You'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('OK'),
-                ),
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Edit Profile'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                _buildEditableField('Name', _nameController),
+                _buildEditableField('Address', _addressController),
+                _buildEditableField('Email', _emailController),
+                _buildEditableField('Phone', _phoneController),
+                _buildEditableField('License Plate', _plateController),
+                _buildEditableField('License Plate 2', _plate2Controller), // Add field for plate2
               ],
-            );
-          },
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                _updateUserDataInFirestore();
+                _updateProfileData();
+                Navigator.of(context).pop();
+              },
+              child: Text('Save'),
+            ),
+          ],
         );
+      },
+    );
+  }
 
-        noBooking=true;
-        break;
-      }
-    }
+  Widget _buildEditableField(String label, TextEditingController controller) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+      ),
+    );
+  }
 
-    print(totalGymPPL);
-
-    if(_typeFacility=="- Gym Room"&& totalGymPPL>=10){
-      print("FULL,Choose another time");
-
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('FULL, please choose another time. Thank You'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-      noBooking=true;
-    }
-
-    if(_typeFacility=="- Swimming Pool"&& totalPoolPPL>=10){
-      print("FULL,Choose another time");
-
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('FULL, please choose another time. Thank You'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-      noBooking=true;
-    }
-
-    if(!noBooking) {
-      if (_nameController.text.isEmpty || _numPeople.isEmpty ||
-          _typeFacility.isEmpty) {
-        // Notify the user if any required fields are empty
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Empty Fields'),
-              content: Text('Please fill in all the required fields.'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-        return; // Stop execution if any field is empty
-      }
-
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
-      Map<String, dynamic> userData = {
+  Future<void> _updateUserDataInFirestore() async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(widget.uid).update({
         'name': _nameController.text,
-        'checkindate': _formatDate(_checkInDate),
-        'checkintime': _formatTime(_checkInTime),
-        'checkouttime': _formatTime(_checkOutTime),
-        'numpeople': _numPeople,
-        'typefacility': _typeFacility,
-        'uid': uid,
-      };
+        'address': _addressController.text,
+        'email': _emailController.text,
+        'phone': _phoneController.text,
+      });
 
-      try {
-        await firestore
-            .collection('facility')
-            .add(userData);
+      await FirebaseFirestore.instance.collection('licenseplate').doc(widget.uid).set({
+        'plate': _plateController.text,
+        'plate2': _plate2Controller.text, // Update for plate2
+        'uid': widget.uid,
+      });
 
-        // Data added successfully
-        print('Data added to Firestore!');
-        print(uid);
-      } catch (e) {
-        // Handle errors
-        print('Error adding data to Firestore: $e');
-      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated')));
+    } catch (e) {
+      print('Error updating data: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile')));
     }
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.year}-${_twoDigits(date.month)}-${_twoDigits(date.day)}';
+  void _updateProfileData() {
+    setState(() {
+      _nameController.text = _nameController.text;
+      _addressController.text = _addressController.text;
+      _emailController.text = _emailController.text;
+      _phoneController.text = _phoneController.text;
+      _plateController.text = _plateController.text;
+      _plate2Controller.text = _plate2Controller.text; // Update for plate2
+    });
   }
-
-  String _formatTime(TimeOfDay time) {
-    return '${_twoDigits(time.hour)}:${_twoDigits(time.minute)}';
-  }
-
-  String _twoDigits(int n) {
-    if (n >= 10) {
-      return '$n';
-    }
-    return '0$n';
-  }
-
-  // Initial Selected Value
-  String dropdownvalue = 'Please choose a type of facility';
-
-  // List of items in our dropdown menu
-  var items = [
-    'Please choose a type of facility',
-    '- Gym Room',
-    '- Swimming Pool',
-  ];
-
-  // Initial Selected Value
-  String dropdownvaluepeople = 'Number of People';
-
-  // List of items in our dropdown menu
-  var numofpeople = [
-    'Number of People',
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    '10',
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pre-Register for Facility'),
+        title: Text('Profile'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Visitor Name',
-                ),
-              ),
+        padding: EdgeInsets.all(20),
+        child: ListView(
+          children: <Widget>[
+            _buildNonEditableField('Name', _nameController, Icons.person),
+            SizedBox(height: 16.0),
 
-              SizedBox(height: 20.0),
+            _buildNonEditableField('Address', _addressController, Icons.location_on),
+            SizedBox(height: 16.0),
 
-              Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Type of Facility:',
-                      style: TextStyle(fontSize: 16),
-                    ),
+            _buildNonEditableField('Email', _emailController, Icons.email),
+            SizedBox(height: 16.0),
 
+            _buildNonEditableField("Phone", _phoneController, Icons.phone),
+            SizedBox(height: 16.0),
 
-                    DropdownButton(
-                      // Initial Value
-                      value: dropdownvalue,
+            _buildNonEditableField("License Plate", _plateController, Icons.car_rental),
+            SizedBox(height: 16.0),
 
-                      // Down Arrow Icon
-                      icon: const Icon(Icons.keyboard_arrow_down),
-                      // Hint text shown when no item is selected
-                      hint: Text('Please choose a type of facility', ),
-                      // Array list of items
-                      items: items.map((String items) {
-                        return DropdownMenuItem(
-                          value: items,
-                          child: Text(items),
-                        );
-                      }).toList(),
-                      // After selecting the desired option,it will
-                      // change button value to selected value
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          dropdownvalue = newValue!;
-                          _typeFacility=newValue;
-                        });
-                      },
-                    ),
-                  ] ),
-
-              SizedBox(height: 16.0),
-
-
-              Column(
-                  crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Row(children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Booking Date:',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 10.0),
-                      Text(
-                        '${_checkInDate.toLocal()}'.split(' ')[0],
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(width: 16.0),
-                  ElevatedButton(
-                    onPressed: () => _selectDate(context),
-                    child: Text('Select Date'),
-                  ),
-                  SizedBox(width: 10.0),
-                ]),
-
-                SizedBox(height: 20.0),
-
-                Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Booking Time (in):',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        SizedBox(height: 10.0),
-                        Text(
-                          '${_checkInTime.format(context)}',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(width: 16.0),
-                    ElevatedButton(
-                      onPressed: () => _selectTime(context),
-                      child: Text('Select Time'),
-                    ),
-                  ],
-                ),
-              ]),
-
-              SizedBox(height: 20.0),
-
-              Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Booking Time (out):',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 10.0),
-                      Text(
-                        '${_checkOutTime.format(context)}',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(width: 16.0),
-                  ElevatedButton(
-                    onPressed: () => _selectTimeOut(context),
-                    child: Text('Select Time'),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 20.0,),
-
-              Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-
-                        Text(
-                          'Number of people:',
-                          style: TextStyle(fontSize: 16),
-                        ),
-
-                        SizedBox(width: 16.0,),
-
-                        DropdownButton(
-                          // Initial Value
-                          value: dropdownvaluepeople,
-
-                          // Down Arrow Icon
-                          icon: const Icon(Icons.keyboard_arrow_down),
-                          // Hint text shown when no item is selected
-                          hint: Text('Number of People'),
-                          // Array list of items
-                          items: numofpeople.map((String numofpeople) {
-                            return DropdownMenuItem(
-                              value: numofpeople,
-                              child: Text(numofpeople),
-                            );
-                          }).toList(),
-                          // After selecting the desired option,it will
-                          // change button value to selected value
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              dropdownvaluepeople = newValue!;
-                              _numPeople=newValue;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ]
-              ),
-
-              SizedBox(height: 32.0),
-              ElevatedButton(
-                onPressed: _submitData,
-                child: Text('Submit'),
-              ),
-              SizedBox(height: 32.0),
-
-              Text('Registered Facility & Time',
-                textAlign: TextAlign.left,
-                style: TextStyle(fontSize: 18,
-                    fontWeight: FontWeight.bold),
-              ),
-
-              SizedBox(height: 16.0,),
-
-              Text('- Gym Room',
-                textAlign: TextAlign.left,
-                style: TextStyle(fontSize: 18,
-                    fontWeight: FontWeight.bold),
-              ),
-
-              SizedBox(height: 10.0),
-
-              Container(
-                height: 300, // Example height constraint, adjust as needed
-                child: DisplayAppointments(uid: uid),
-              ),
-
-              SizedBox(height: 16.0,),
-
-              Text('- Swimming Pool',
-                textAlign: TextAlign.left,
-                style: TextStyle(fontSize: 18,
-                    fontWeight: FontWeight.bold),
-              ),
-
-              SizedBox(height: 10.0),
-
-              Container(
-                height: 300, // Example height constraint, adjust as needed
-                child: DisplayAppointmentsPool(uid: uid),
-              ),
-            ],
-          ),
+            _buildNonEditableField("License Plate 2", _plate2Controller, Icons.car_rental), // Add field for plate2
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                _showEditDialog();
+              },
+              child: Text('Edit'),
+            ),
+          ],
         ),
       ),
     );
   }
-}
 
-class DisplayAppointments extends StatelessWidget {
-  final String uid;
-
-  DisplayAppointments({required this.uid});
-
-  String _formatDate(DateTime date) {
-    return '${date.year}-${_twoDigits(date.month)}-${_twoDigits(date.day)}';
-  }
-
-  String _formatTime(TimeOfDay time) {
-    return '${_twoDigits(time.hour)}:${_twoDigits(time.minute)}';
-  }
-
-  String _twoDigits(int n) {
-    if (n >= 10) {
-      return '$n';
-    }
-    return '0$n';
+  Widget _buildNonEditableField(String label, TextEditingController controller, IconData icon) {
+    return InputDecorator(
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        enabled: false,
+        border: OutlineInputBorder(),
+      ),
+      child: Text(
+        controller.text,
+        style: TextStyle(fontSize: 16.0),
+      ),
+    );
   }
 
   @override
-  Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: FirebaseFirestore.instance
-          .collection('facility')
-          .where('typefacility', isEqualTo: '- Gym Room')
-      //         .orderBy('checkintime', descending: false)
-      //         .startAfter()
-      //         .limit(10)
-          .snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (!snapshot.hasData) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        return Container(
-          height: 300,
-          child: ListView(
-            children: snapshot.data!.docs.map((document) {
-              Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-
-              void _deleteData() async {
-                await FirebaseFirestore.instance
-                    .collection('facility')
-                    .doc(document.id)
-                    .delete();
-              }
-
-              void _editData() {
-                TextEditingController nameController = TextEditingController(text: data['name']);
-                TextEditingController peopleController = TextEditingController(text: data['numpeople']);
-                TextEditingController facilityController = TextEditingController(text: data['typefacility']);
-                DateTime selectedDate = DateTime.parse(data['checkindate']);
-                TimeOfDay selectedTime = TimeOfDay(
-                  hour: int.parse(data['checkintime'].split(':')[0]),
-                  minute: int.parse(data['checkintime'].split(':')[1]),
-                );
-
-
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text('Edit Data'),
-                      content: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TextField(
-                              controller: nameController,
-                              decoration:
-                              InputDecoration(labelText: 'Register Resident Name'),
-                            ),
-
-
-
-                            SizedBox(height: 16.0),
-
-                            TextField(
-                              controller: peopleController,
-                              decoration: InputDecoration(
-                                  labelText: 'Number of People'),
-                            ),
-                            SizedBox(height: 16.0),
-
-//////////////////////////////////////////////////////////////////////////////////
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(children: [
-                                  Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Selected Date: '),
-                                        Text('${_formatDate(selectedDate)}'),
-                                        SizedBox(width: 10.0),
-                                      ]),
-
-//////////////////////////////////////////////////////////////////////////////////
-                                  Spacer(),
-
-                                  TextButton(
-                                    onPressed: () async {
-                                      final DateTime? picked =
-                                      await showDatePicker(
-                                        context: context,
-                                        initialDate: selectedDate,
-                                        firstDate: DateTime.now(),
-                                        lastDate: DateTime(2101),
-                                      );
-                                      if (picked != null) {
-                                        selectedDate = picked;
-                                      }
-                                    },
-                                    child: Text('Select Date'),
-                                  ),
-                                ]),
-                              ],
-                            ),
-                            SizedBox(height: 16.0),
-
-//////////////////////////////////////////////////////////////////////////////////
-                            Row(
-                              children: [
-                                Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Selected Time: '),
-                                      Text('${selectedTime.format(context)}'),
-                                      SizedBox(width: 10.0),
-                                    ]),
-///////////////////////////////////////////////////////////////////////////////////////////////
-                                Spacer(),
-                                TextButton(
-                                  onPressed: () async {
-                                    final TimeOfDay? picked =
-                                    await showTimePicker(
-                                      context: context,
-                                      initialTime: selectedTime,
-                                    );
-                                    if (picked != null) {
-                                      selectedTime = picked;
-                                    }
-                                  },
-                                  child: Text('Select Time'),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: () async {
-                            // Update data in Firestore
-                            await FirebaseFirestore.instance
-                                .collection('facility')
-                                .doc(document.id)
-                                .update({
-                              'name': nameController.text,
-                              'numpeople': peopleController.text,
-                              'typefacility':facilityController.text,
-                              'checkindate': _formatDate(selectedDate),
-                              'checkintime': _formatTime(selectedTime),
-
-                            });
-                            Navigator.of(context).pop(); // Close the dialog
-                          },
-                          child: Text('Save'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              }
-
-              return Card(
-                margin: EdgeInsets.all(8.0),
-                child: ListTile(
-                  title: Text('Name: ${data['name']}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Check-in: ${_formatDate(DateTime.parse(data['checkindate']))} ${data['checkintime']}'),
-                      Text('Num of People: ${data['numpeople']}'),
-                      Text('UID:  ${data['uid']}'),
-                    ],
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          // Call the edit function when edit icon is pressed
-                          _editData();
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () {
-                          // Call the delete function when delete icon is pressed
-                          _deleteData();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class DisplayAppointmentsPool extends StatelessWidget {
-  final String uid;
-
-  DisplayAppointmentsPool({required this.uid});
-
-  String _formatDate(DateTime date) {
-    return '${date.year}-${_twoDigits(date.month)}-${_twoDigits(date.day)}';
-  }
-
-  String _formatTime(TimeOfDay time) {
-    return '${_twoDigits(time.hour)}:${_twoDigits(time.minute)}';
-  }
-
-  String _twoDigits(int n) {
-    if (n >= 10) {
-      return '$n';
-    }
-    return '0$n';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: FirebaseFirestore.instance
-          .collection('facility')
-          .where('typefacility', isEqualTo: '- Swimming Pool')
-      //         .orderBy('checkintime', descending: false)
-      //         .startAfter()
-      //         .limit(10)
-          .snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (!snapshot.hasData) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        return Container(
-          height: 300,
-          child: ListView(
-            children: snapshot.data!.docs.map((document) {
-              Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-
-              void _deleteData() async {
-                await FirebaseFirestore.instance
-                    .collection('facility')
-                    .doc(document.id)
-                    .delete();
-              }
-
-              void _editData() {
-                TextEditingController nameController = TextEditingController(text: data['name']);
-                TextEditingController peopleController = TextEditingController(text: data['numpeople']);
-                TextEditingController facilityController = TextEditingController(text: data['typefacility']);
-                DateTime selectedDate = DateTime.parse(data['checkindate']);
-                TimeOfDay selectedTime = TimeOfDay(
-                  hour: int.parse(data['checkintime'].split(':')[0]),
-                  minute: int.parse(data['checkintime'].split(':')[1]),
-                );
-
-
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text('Edit Data'),
-                      content: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TextField(
-                              controller: nameController,
-                              decoration:
-                              InputDecoration(labelText: 'Register Resident Name'),
-                            ),
-
-
-
-                            SizedBox(height: 16.0),
-
-                            TextField(
-                              controller: peopleController,
-                              decoration: InputDecoration(
-                                  labelText: 'Number of People'),
-                            ),
-                            SizedBox(height: 16.0),
-
-//////////////////////////////////////////////////////////////////////////////////
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(children: [
-                                  Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Selected Date: '),
-                                        Text('${_formatDate(selectedDate)}'),
-                                        SizedBox(width: 10.0),
-                                      ]),
-
-//////////////////////////////////////////////////////////////////////////////////
-                                  Spacer(),
-
-                                  TextButton(
-                                    onPressed: () async {
-                                      final DateTime? picked =
-                                      await showDatePicker(
-                                        context: context,
-                                        initialDate: selectedDate,
-                                        firstDate: DateTime.now(),
-                                        lastDate: DateTime(2101),
-                                      );
-                                      if (picked != null) {
-                                        selectedDate = picked;
-                                      }
-                                    },
-                                    child: Text('Select Date'),
-                                  ),
-                                ]),
-                              ],
-                            ),
-                            SizedBox(height: 16.0),
-
-//////////////////////////////////////////////////////////////////////////////////
-                            Row(
-                              children: [
-                                Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Selected Time: '),
-                                      Text('${selectedTime.format(context)}'),
-                                      SizedBox(width: 10.0),
-                                    ]),
-///////////////////////////////////////////////////////////////////////////////////////////////
-                                Spacer(),
-                                TextButton(
-                                  onPressed: () async {
-                                    final TimeOfDay? picked =
-                                    await showTimePicker(
-                                      context: context,
-                                      initialTime: selectedTime,
-                                    );
-                                    if (picked != null) {
-                                      selectedTime = picked;
-                                    }
-                                  },
-                                  child: Text('Select Time'),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: () async {
-                            // Update data in Firestore
-                            await FirebaseFirestore.instance
-                                .collection('facility')
-                                .doc(document.id)
-                                .update({
-                              'name': nameController.text,
-                              'numpeople': peopleController.text,
-                              'typefacility':facilityController.text,
-                              'checkindate': _formatDate(selectedDate),
-                              'checkintime': _formatTime(selectedTime),
-
-                            });
-                            Navigator.of(context).pop(); // Close the dialog
-                          },
-                          child: Text('Save'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              }
-
-              return Card(
-                margin: EdgeInsets.all(8.0),
-                child: ListTile(
-                  title: Text('Name: ${data['name']}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Check-in: ${_formatDate(DateTime.parse(data['checkindate']))} ${data['checkintime']}'),
-                      Text('Num of People: ${data['numpeople']}'),
-                      Text('UID:  ${data['uid']}'),
-                    ],
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          // Call the edit function when edit icon is pressed
-                          _editData();
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () {
-                          // Call the delete function when delete icon is pressed
-                          _deleteData();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
+  void dispose() {
+    _nameController.dispose();
+    _addressController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _plateController.dispose();
+    _plate2Controller.dispose(); // Dispose the new controller
+    super.dispose();
   }
 }

@@ -15,6 +15,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
   late TextEditingController _addressController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
+  late TextEditingController _plateController;
+  late TextEditingController _plate2Controller; // New controller for plate2
 
   @override
   void initState() {
@@ -23,6 +25,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
     _addressController = TextEditingController();
     _emailController = TextEditingController();
     _phoneController = TextEditingController();
+    _plateController = TextEditingController();
+    _plate2Controller = TextEditingController(); // Initialize the new controller
 
     fetchUserData();
   }
@@ -37,6 +41,24 @@ class _UserProfilePageState extends State<UserProfilePage> {
         _addressController.text = snapshot.data()!['address'] ?? 'Your Address';
         _emailController.text = snapshot.data()!['email'] ?? 'youremail@example.com';
         _phoneController.text = snapshot.data()!['phone'] ?? '+1234567890';
+      });
+    }
+
+    DocumentSnapshot<Map<String, dynamic>> plateSnapshot =
+    await FirebaseFirestore.instance.collection('licenseplate').doc(widget.uid).get();
+
+    if (plateSnapshot.exists) {
+      setState(() {
+        _plateController.text = plateSnapshot.data()!['plate'] ?? '';
+      });
+    }
+
+    DocumentSnapshot<Map<String, dynamic>> plate2Snapshot = // Fetch data only for License Plate 2
+    await FirebaseFirestore.instance.collection('licenseplate').doc(widget.uid+'999999').get();
+
+    if (plate2Snapshot.exists) { // Update _plate2Controller only if data exists for License Plate 2
+      setState(() {
+        _plate2Controller.text = plate2Snapshot.data()!['plate'] ?? '';
       });
     }
   }
@@ -54,6 +76,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 _buildEditableField('Address', _addressController),
                 _buildEditableField('Email', _emailController),
                 _buildEditableField('Phone', _phoneController),
+                _buildEditableField('License Plate', _plateController),
+                _buildEditableField('License Plate 2', _plate2Controller), // Add field for plate2
               ],
             ),
           ),
@@ -61,7 +85,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             ElevatedButton(
               onPressed: () {
                 _updateUserDataInFirestore();
-                _updateProfileData(); // Update the profile data on the page
+                _updateProfileData();
                 Navigator.of(context).pop();
               },
               child: Text('Save'),
@@ -89,6 +113,17 @@ class _UserProfilePageState extends State<UserProfilePage> {
         'email': _emailController.text,
         'phone': _phoneController.text,
       });
+
+      await FirebaseFirestore.instance.collection('licenseplate').doc(widget.uid).set({
+        'plate': _plateController.text,
+        'uid': widget.uid,
+      });
+
+      await FirebaseFirestore.instance.collection('licenseplate').doc(widget.uid+'999999').set({
+        'plate': _plate2Controller.text, // Update for plate2
+        'uid': widget.uid+'999999',
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated')));
     } catch (e) {
       print('Error updating data: $e');
@@ -102,6 +137,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
       _addressController.text = _addressController.text;
       _emailController.text = _emailController.text;
       _phoneController.text = _phoneController.text;
+      _plateController.text = _plateController.text;
+      _plate2Controller.text = _plate2Controller.text; // Update for plate2
     });
   }
 
@@ -125,8 +162,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
             SizedBox(height: 16.0),
 
             _buildNonEditableField("Phone", _phoneController, Icons.phone),
+            SizedBox(height: 16.0),
 
+            _buildNonEditableField("License Plate", _plateController, Icons.car_rental),
+            SizedBox(height: 16.0),
 
+            _buildNonEditableField("License Plate 2", _plate2Controller, Icons.car_rental), // Add field for plate2
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
@@ -161,6 +202,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
     _addressController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
+    _plateController.dispose();
+    _plate2Controller.dispose(); // Dispose the new controller
     super.dispose();
   }
 }

@@ -104,7 +104,7 @@ class UserPaymentDetailsPage extends StatelessWidget {
                         ),
                         Padding(
                           padding: EdgeInsets.all(8.0),
-                          child: Text('Method: ${payment['method']}'),
+                          child: Text('Payment Method: ${payment['method']}'),
                         ),
                         Padding(
                           padding: EdgeInsets.all(8.0),

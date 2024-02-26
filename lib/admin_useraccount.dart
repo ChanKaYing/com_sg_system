@@ -201,40 +201,51 @@ class _UsersAccountTableState extends State<UsersAccountTable> {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: Text('Edit User'),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                TextField(
-                                  controller: nameController,
-                                  decoration: InputDecoration(labelText: 'Name'),
-                                ),
-                                TextField(
-                                  controller: addressController,
-                                  decoration: InputDecoration(labelText: 'Address'),
-                                ),
-                                TextField(
-                                  controller: emailController,
-                                  decoration: InputDecoration(labelText: 'Email'),
-                                ),
-                                TextField(
-                                  controller: passwordController,
-                                  decoration: InputDecoration(labelText: 'Password'),
-                                ),
-                                TextField(
-                                  controller: phoneController,
-                                  keyboardType: TextInputType.phone,
-                                  decoration: InputDecoration(labelText: 'Phone'),
-                                ),
-                                Row(
-                                  children: [
-                                    Text(user['member']),
-                                    Checkbox(
-                                      value: user['member'] == '1',
-                                      onChanged: null,
-                                    ),
-                                  ],
-                                ),
-                              ],
+                            content:
+                            StatefulBuilder(builder:(BuildContext context,void Function(void Function()) setState) {
+
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  TextField(
+                                    controller: nameController,
+                                    decoration: InputDecoration(labelText: 'Name'),
+                                  ),
+                                  TextField(
+                                    controller: addressController,
+                                    decoration: InputDecoration(labelText: 'Address'),
+                                  ),
+                                  TextField(
+                                    controller: emailController,
+                                    decoration: InputDecoration(labelText: 'Email'),
+                                  ),
+                                  TextField(
+                                    controller: passwordController,
+                                    decoration: InputDecoration(labelText: 'Password'),
+                                  ),
+                                  TextField(
+                                    controller: phoneController,
+                                    keyboardType: TextInputType.phone,
+                                    decoration: InputDecoration(labelText: 'Phone'),
+                                  ),
+                                  SizedBox(height: 10.0,),
+                                  Row(
+                                    children: [
+                                      Text('Member'),
+                                      Checkbox(
+                                        value: memberController.text == '1',
+                                        onChanged: (value) {
+                                          setState(() {
+                                            memberController.text = value! ? '1' : '0';
+                                            print(_isMember);
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
                             ),
                             actions: [
                               TextButton(
@@ -265,43 +276,50 @@ class _UsersAccountTableState extends State<UsersAccountTable> {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: Text('Edit User'),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                TextField(
-                                  controller: nameController,
-                                  decoration: InputDecoration(labelText: 'Name'),
-                                ),
-                                TextField(
-                                  controller: addressController,
-                                  decoration: InputDecoration(labelText: 'Address'),
-                                ),
-                                TextField(
-                                  controller: emailController,
-                                  decoration: InputDecoration(labelText: 'Email'),
-                                ),
-                                TextField(
-                                  controller: passwordController,
-                                  decoration: InputDecoration(labelText: 'Password'),
-                                ),
-                                TextField(
-                                  controller: phoneController,
-                                  keyboardType: TextInputType.phone,
-                                  decoration: InputDecoration(labelText: 'Phone'),
-                                ),
-                                Row(
-                                  children: [
-                                    Text('Member'),
-                                    Checkbox(
-                                      value: memberController.text == '1',
-                                      onChanged: (value) {
-                                        Navigator.of(context).pop();
-                                        _saveUserData(context, user);
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
+                            content: StatefulBuilder(builder:(BuildContext context,void Function(void Function()) setState) {
+
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  TextField(
+                                    controller: nameController,
+                                    decoration: InputDecoration(labelText: 'Name'),
+                                  ),
+                                  TextField(
+                                    controller: addressController,
+                                    decoration: InputDecoration(labelText: 'Address'),
+                                  ),
+                                  TextField(
+                                    controller: emailController,
+                                    decoration: InputDecoration(labelText: 'Email'),
+                                  ),
+                                  TextField(
+                                    controller: passwordController,
+                                    decoration: InputDecoration(labelText: 'Password'),
+                                  ),
+                                  TextField(
+                                    controller: phoneController,
+                                    keyboardType: TextInputType.phone,
+                                    decoration: InputDecoration(labelText: 'Phone'),
+                                  ),
+                                  SizedBox(height: 10.0,),
+                                  Row(
+                                    children: [
+                                      Text('Member'),
+                                      Checkbox(
+                                        value: memberController.text == '1',
+                                        onChanged: (value) {
+                                          setState(() {
+                                            memberController.text = value! ? '1' : '0';
+                                            print(_isMember);
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
                             ),
                             actions: [
                               TextButton(
@@ -331,44 +349,50 @@ class _UsersAccountTableState extends State<UsersAccountTable> {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: Text('Edit User'),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                TextField(
-                                  controller: nameController,
-                                  decoration: InputDecoration(labelText: 'Name'),
-                                ),
-                                TextField(
-                                  controller: addressController,
-                                  decoration: InputDecoration(labelText: 'Address'),
-                                ),
-                                TextField(
-                                  controller: emailController,
-                                  decoration: InputDecoration(labelText: 'Email'),
-                                ),
-                                TextField(
-                                  controller: passwordController,
-                                  decoration: InputDecoration(labelText: 'Password'),
-                                ),
-                                TextField(
-                                  controller: phoneController,
-                                  keyboardType: TextInputType.phone,
-                                  decoration: InputDecoration(labelText: 'Phone'),
-                                ),
-                                SizedBox(height: 10.0,),
-                                Row(
-                                  children: [
-                                    Text('Member'),
-                                    Checkbox(
-                                      value: memberController.text == '1',
-                                      onChanged: (value) {
-                                        Navigator.of(context).pop();
-                                        _saveUserData(context, user);
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
+                            content: StatefulBuilder(builder:(BuildContext context,void Function(void Function()) setState) {
+
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  TextField(
+                                    controller: nameController,
+                                    decoration: InputDecoration(labelText: 'Name'),
+                                  ),
+                                  TextField(
+                                    controller: addressController,
+                                    decoration: InputDecoration(labelText: 'Address'),
+                                  ),
+                                  TextField(
+                                    controller: emailController,
+                                    decoration: InputDecoration(labelText: 'Email'),
+                                  ),
+                                  TextField(
+                                    controller: passwordController,
+                                    decoration: InputDecoration(labelText: 'Password'),
+                                  ),
+                                  TextField(
+                                    controller: phoneController,
+                                    keyboardType: TextInputType.phone,
+                                    decoration: InputDecoration(labelText: 'Phone'),
+                                  ),
+                                  SizedBox(height: 10.0,),
+                                  Row(
+                                    children: [
+                                      Text('Member'),
+                                      Checkbox(
+                                        value: memberController.text == '1',
+                                        onChanged: (value) {
+                                          setState(() {
+                                            memberController.text = value! ? '1' : '0';
+                                            print(_isMember);
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
                             ),
                             actions: [
                               TextButton(
@@ -398,43 +422,50 @@ class _UsersAccountTableState extends State<UsersAccountTable> {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: Text('Edit User'),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                TextField(
-                                  controller: nameController,
-                                  decoration: InputDecoration(labelText: 'Name'),
-                                ),
-                                TextField(
-                                  controller: addressController,
-                                  decoration: InputDecoration(labelText: 'Address'),
-                                ),
-                                TextField(
-                                  controller: emailController,
-                                  decoration: InputDecoration(labelText: 'Email'),
-                                ),
-                                TextField(
-                                  controller: passwordController,
-                                  decoration: InputDecoration(labelText: 'Password'),
-                                ),
-                                TextField(
-                                  controller: phoneController,
-                                  keyboardType: TextInputType.phone,
-                                  decoration: InputDecoration(labelText: 'Phone'),
-                                ),
-                                Row(
-                                  children: [
-                                    Text('Member'),
-                                    Checkbox(
-                                      value: memberController.text == '1',
-                                      onChanged: (value) {
-                                        Navigator.of(context).pop();
-                                        _saveUserData(context, user);
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
+                            content: StatefulBuilder(builder:(BuildContext context,void Function(void Function()) setState) {
+
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  TextField(
+                                    controller: nameController,
+                                    decoration: InputDecoration(labelText: 'Name'),
+                                  ),
+                                  TextField(
+                                    controller: addressController,
+                                    decoration: InputDecoration(labelText: 'Address'),
+                                  ),
+                                  TextField(
+                                    controller: emailController,
+                                    decoration: InputDecoration(labelText: 'Email'),
+                                  ),
+                                  TextField(
+                                    controller: passwordController,
+                                    decoration: InputDecoration(labelText: 'Password'),
+                                  ),
+                                  TextField(
+                                    controller: phoneController,
+                                    keyboardType: TextInputType.phone,
+                                    decoration: InputDecoration(labelText: 'Phone'),
+                                  ),
+                                  SizedBox(height: 10.0,),
+                                  Row(
+                                    children: [
+                                      Text('Member'),
+                                      Checkbox(
+                                        value: memberController.text == '1',
+                                        onChanged: (value) {
+                                          setState(() {
+                                            memberController.text = value! ? '1' : '0';
+                                            print(_isMember);
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
                             ),
                             actions: [
                               TextButton(
@@ -464,43 +495,50 @@ class _UsersAccountTableState extends State<UsersAccountTable> {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: Text('Edit User'),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                TextField(
-                                  controller: nameController,
-                                  decoration: InputDecoration(labelText: 'Name'),
-                                ),
-                                TextField(
-                                  controller: addressController,
-                                  decoration: InputDecoration(labelText: 'Address'),
-                                ),
-                                TextField(
-                                  controller: emailController,
-                                  decoration: InputDecoration(labelText: 'Email'),
-                                ),
-                                TextField(
-                                  controller: passwordController,
-                                  decoration: InputDecoration(labelText: 'Password'),
-                                ),
-                                TextField(
-                                  controller: phoneController,
-                                  keyboardType: TextInputType.phone,
-                                  decoration: InputDecoration(labelText: 'Phone'),
-                                ),
-                                Row(
-                                  children: [
-                                    Text('Member'),
-                                    Checkbox(
-                                      value: memberController.text == '1',
-                                      onChanged: (value) {
-                                        Navigator.of(context).pop();
-                                        _saveUserData(context, user);
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
+                            content: StatefulBuilder(builder:(BuildContext context,void Function(void Function()) setState) {
+
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  TextField(
+                                    controller: nameController,
+                                    decoration: InputDecoration(labelText: 'Name'),
+                                  ),
+                                  TextField(
+                                    controller: addressController,
+                                    decoration: InputDecoration(labelText: 'Address'),
+                                  ),
+                                  TextField(
+                                    controller: emailController,
+                                    decoration: InputDecoration(labelText: 'Email'),
+                                  ),
+                                  TextField(
+                                    controller: passwordController,
+                                    decoration: InputDecoration(labelText: 'Password'),
+                                  ),
+                                  TextField(
+                                    controller: phoneController,
+                                    keyboardType: TextInputType.phone,
+                                    decoration: InputDecoration(labelText: 'Phone'),
+                                  ),
+                                  SizedBox(height: 10.0,),
+                                  Row(
+                                    children: [
+                                      Text('Member'),
+                                      Checkbox(
+                                        value: memberController.text == '1',
+                                        onChanged: (value) {
+                                          setState(() {
+                                            memberController.text = value! ? '1' : '0';
+                                            print(_isMember);
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
                             ),
                             actions: [
                               TextButton(
@@ -530,46 +568,50 @@ class _UsersAccountTableState extends State<UsersAccountTable> {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: Text('Edit User'),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                TextField(
-                                  controller: nameController,
-                                  decoration: InputDecoration(labelText: 'Name'),
-                                ),
-                                TextField(
-                                  controller: addressController,
-                                  decoration: InputDecoration(labelText: 'Address'),
-                                ),
-                                TextField(
-                                  controller: emailController,
-                                  decoration: InputDecoration(labelText: 'Email'),
-                                ),
-                                TextField(
-                                  controller: passwordController,
-                                  decoration: InputDecoration(labelText: 'Password'),
-                                ),
-                                TextField(
-                                  controller: phoneController,
-                                  keyboardType: TextInputType.phone,
-                                  decoration: InputDecoration(labelText: 'Phone'),
-                                ),
-                                SizedBox(height: 16.0),
-                                Row(
-                                  children: [
-                                    Text('Member'),
-                                    Checkbox(
-                                      value: _isMember,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          print(value);
-                                          _isMember = value!;
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
+                            content: StatefulBuilder(builder:(BuildContext context,void Function(void Function()) setState) {
+
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  TextField(
+                                    controller: nameController,
+                                    decoration: InputDecoration(labelText: 'Name'),
+                                  ),
+                                  TextField(
+                                    controller: addressController,
+                                    decoration: InputDecoration(labelText: 'Address'),
+                                  ),
+                                  TextField(
+                                    controller: emailController,
+                                    decoration: InputDecoration(labelText: 'Email'),
+                                  ),
+                                  TextField(
+                                    controller: passwordController,
+                                    decoration: InputDecoration(labelText: 'Password'),
+                                  ),
+                                  TextField(
+                                    controller: phoneController,
+                                    keyboardType: TextInputType.phone,
+                                    decoration: InputDecoration(labelText: 'Phone'),
+                                  ),
+                                  SizedBox(height: 10.0,),
+                                  Row(
+                                    children: [
+                                      Text('Member'),
+                                      Checkbox(
+                                        value: memberController.text == '1',
+                                        onChanged: (value) {
+                                          setState(() {
+                                            memberController.text = value! ? '1' : '0';
+                                            print(_isMember);
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
                             ),
                             actions: [
                               TextButton(

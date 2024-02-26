@@ -264,7 +264,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
-                            Expanded(
+         /*                   Expanded(
                               child: Column(
                                 children: [
                                   Padding(
@@ -273,8 +273,8 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                                   ),
                                 ],
                               ),
-                            ),
-                            Expanded(
+                           ),
+        */                  Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.all(10.0),
                                 child: Column(
